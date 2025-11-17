@@ -89,25 +89,24 @@ router.post('/', async (req, res) => {
     const canonicalId = target._id;
     console.log('Backend: Canonical ID found:', canonicalId);
 
-    // Use findOneAndUpdate with upsert for an atomic "find or create" operation.
-    // This is more efficient than a separate find and create.
-    const like = await Like.findOneAndUpdate(
-      {
-        userId: req.user.userId,
-        targetType,
-        targetId: canonicalId,
-      },
-      { $setOnInsert: { createdAt: new Date() } }, // Set fields only on creation
-      { new: true, upsert: true, runValidators: true }
-    );
+    // Check if the like already exists
+    const existingLike = await Like.findOne({
+      userId: req.user.userId,
+      targetType,
+      targetId: canonicalId,
+    });
 
-    // If the document was found and not created, its `createdAt` will differ from `updatedAt`.
-    // A more direct check is if the `createdAt` and `updatedAt` timestamps are the same (within a small tolerance).
-    // The `upserted` flag from the raw result is the most reliable way, but this is a good approximation.
-    if (like.createdAt.getTime() !== like.updatedAt.getTime()) {
+    if (existingLike) {
       console.log('Backend: Already liked by user (found existing document)');
       return res.status(400).json({ error: 'Already liked' });
     }
+
+    // Create the new like
+    const like = await Like.create({
+      userId: req.user.userId,
+      targetType,
+      targetId: canonicalId,
+    });
 
     console.log('Backend: Like created:', like);
 
