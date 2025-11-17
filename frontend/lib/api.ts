@@ -13,6 +13,10 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
 // Movies API
 export const moviesAPI = {
+  getMovie: async (id: string) => {
+    const { data } = await api.get(`/api/movies/${id}`);
+    return data.movie;
+  },
   getById: (id: string, tmdbId?: number) =>
     api.get(`/api/movies/${id}`, tmdbId ? { params: { tmdbId } } : {}),
 
