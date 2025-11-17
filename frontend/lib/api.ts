@@ -1,101 +1,6 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios from 'axios';
 
-// Create axios instance
-const api: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001',
-  withCredentials: true, // Include cookies for refresh token
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
-
-// Store for access token (in memory)
-let accessToken: string | null = null;
-
-export const setAccessToken = (token: string | null) => {
-  accessToken = token;
-};
-
-export const getAccessToken = () => accessToken;
-
-// Request interceptor: Add Authorization header
-api.interceptors.request.use(
-  (config) => {
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor: Handle 401 and refresh token
-api.interceptors.response.use(
-  (response) => response,
-  async (error: AxiosError) => {
-    const originalRequest = error.config as any;
-
-    // If 401 and not already retried
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        // Try to refresh token
-        const refreshResponse = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
-
-        if (refreshResponse.data.accessToken) {
-          const newToken = refreshResponse.data.accessToken;
-          setAccessToken(newToken);
-
-          // Retry original request with new token
-          originalRequest.headers.Authorization = `Bearer ${newToken}`;
-          return api(originalRequest);
-        }
-      } catch (refreshError) {
-        // Refresh failed, redirect to login
-        if (typeof window !== 'undefined') {
-          setAccessToken(null);
-          window.location.href = '/login';
-        }
-        return Promise.reject(refreshError);
-      }
-    }
-
-    return Promise.reject(error);
-  }
-);
-
-// Auth API
-export const authAPI = {
-  signup: (email: string, password: string) =>
-    api.post('/api/auth/signup', { email, password }),
-
-  login: (email: string, password: string) =>
-    api.post('/api/auth/login', { email, password }),
-
-  logout: () => api.post('/api/auth/logout'),
-
-  refresh: () => api.post('/api/auth/refresh')
-};
-
-// User API
-export const userAPI = {
-  getProfile: () => api.get('/api/user/profile'),
-
-  updateProfile: (data: any) => api.patch('/api/user/profile', data),
-
-  getStats: () => api.get('/api/user/stats'),
-
-  getLikedMovies: (page = 1, limit = 20) =>
-    api.get('/api/user/liked-movies', { params: { page, limit } }),
-
-  getLikedActors: () => api.get('/api/user/liked-actors'),
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
   getLikedDirectors: () => api.get('/api/user/liked-directors'),
 
@@ -162,7 +67,7 @@ export const recommendationsAPI = {
   search: (query: string, userPreferences?: any) =>
     api.post('/api/recommendations/search', { query, userPreferences }),
 
-  getHome: () => api.get('/api/recommendations/home')
+export const getMovie = async (id: string) => {
+  const { data } = await apiClient.get(`/api/movies/${id}`);
+  return data.movie;
 };
-
-export default api;
