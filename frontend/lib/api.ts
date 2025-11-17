@@ -108,6 +108,10 @@ export const userAPI = {
 
 // Movies API
 export const moviesAPI = {
+  getMovie: async (id: string) => {
+    const { data } = await api.get(`/api/movies/${id}`);
+    return data.movie;
+  },
   getById: (id: string, tmdbId?: number) =>
     api.get(`/api/movies/${id}`, tmdbId ? { params: { tmdbId } } : {}),
 
@@ -150,7 +154,10 @@ export const actorsAPI = {
 
 // Directors API
 export const directorsAPI = {
-  getById: (id: string) => api.get(`/api/directors/${id}`),
+  getById: async (id: string) => {
+    const { data } = await api.get(`/api/directors/${id}`);
+    return data.director;
+  },
   search: (q: string) => api.get('/api/directors/search', { params: { q } })
 };
 
