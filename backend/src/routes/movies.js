@@ -1,13 +1,12 @@
 // javascript
 const express = require('express');
-const mongoose = require('mongoose');
 const router = express.Router();
 const Movie = require('../models/Movie');
 const Click = require('../models/Click');
 const Like = require('../models/Like');
 const { optionalAuth, authenticateToken } = require('../middleware/auth');
-const { getMovieByTmdbId, searchMoviesOnTMDB } = require('../services/tmdbService');
-const { isValidObjectId } = require('../utils/validation');
+const { findMovie } = require('../middleware/movies');
+const { searchMoviesOnTMDB } = require('../services/tmdbService');
 
 /**
  * GET /api/movies/popular
@@ -204,38 +203,13 @@ router.get('/new', optionalAuth, async (req, res) => {
  * Get single movie details
  * Auth: Optional
  */
-router.get('/:id', optionalAuth, async (req, res) => {
+router.get('/:id', optionalAuth, findMovie, async (req, res) => {
   try {
-    const rawId = req.params.id;
-    if (!rawId) return res.status(400).json({ error: 'Missing id parameter' });
-
-    let movie = null;
-    if (mongoose.Types.ObjectId.isValid(rawId)) {
-      movie = await Movie.findById(rawId);
-    } else {
-      const tmdbCandidate = Number(rawId);
-      if (!Number.isNaN(tmdbCandidate)) {
-        movie = await Movie.findOne({ tmdbId: tmdbCandidate });
-      }
-    }
-
-    if (!movie && req.query.tmdbId) {
-      const parsedTmdb = parseInt(req.query.tmdbId, 10);
-      if (!Number.isNaN(parsedTmdb)) {
-        movie = await getMovieByTmdbId(parsedTmdb);
-      }
-    }
-
-    if (!movie) {
-      return res.status(404).json({ error: 'Movie not found' });
-    }
-
+    const { movie } = req;
     let userLiked = false;
     if (req.user) {
       const like = await Like.findOne({ userId: req.user.userId, targetType: 'movie', targetId: movie._id });
       userLiked = !!like;
-      Click.create({ userId: req.user.userId, movieId: movie._id }).catch(err => console.error('Error tracking click:', err));
-      Movie.findByIdAndUpdate(movie._id, { $inc: { viewCount: 1 } }).catch(err => console.error('Error incrementing view count:', err));
     }
 
     res.status(200).json({
@@ -268,25 +242,9 @@ router.get('/:id', optionalAuth, async (req, res) => {
  * Track movie click/view
  * Auth: Required
  */
-router.post('/:id/click', authenticateToken, async (req, res) => {
+router.post('/:id/click', authenticateToken, findMovie, async (req, res) => {
   try {
-    const rawId = req.params.id;
-    if (!rawId) return res.status(400).json({ error: 'Missing id parameter' });
-
-    let movie = null;
-    if (mongoose.Types.ObjectId.isValid(rawId)) {
-      movie = await Movie.findById(rawId);
-    } else {
-      const tmdbCandidate = Number(rawId);
-      if (!Number.isNaN(tmdbCandidate)) {
-        movie = await Movie.findOne({ tmdbId: tmdbCandidate });
-      }
-    }
-
-    if (!movie) {
-      return res.status(404).json({ error: 'Movie not found' });
-    }
-
+    const { movie } = req;
     await Click.create({ userId: req.user.userId, movieId: movie._id });
     await Movie.findByIdAndUpdate(movie._id, { $inc: { viewCount: 1 } });
 
