@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { likesAPI } from '@/lib/api';
 
@@ -85,16 +86,11 @@ export default function PersonList({ type, items }: Props) {
     }
   };
 
-  const goTo = (id: string) => {
-    if (type === 'Actor') router.push(`/actor/${id}`);
-    else router.push(`/director/${id}`);
-  };
-
   return (
     <div className="divide-y divide-white/10 rounded-lg overflow-hidden bg-white/5">
       {normalized.map((n) => (
         <div key={n.id} className="flex items-center justify-between px-4 py-3">
-          <div className="min-w-0 cursor-pointer" onClick={() => goTo(n.id)}>
+          <Link href={type === 'Actor' ? `/actor/${n.id}` : `/director/${n.id}`} className="min-w-0">
             <div className="font-medium text-gray-100 truncate" title={n.name}>
               {n.name}
             </div>
@@ -103,7 +99,7 @@ export default function PersonList({ type, items }: Props) {
                 {n.sub}
               </div>
             ) : null}
-          </div>
+          </Link>
           <button
             onClick={() => toggle(n.id)}
             disabled={Boolean(loadingIds[n.id])}

@@ -150,7 +150,10 @@ export const actorsAPI = {
 
 // Directors API
 export const directorsAPI = {
-  getById: (id: string) => api.get(`/api/directors/${id}`),
+  getById: async (id: string) => {
+    const { data } = await api.get(`/api/directors/${id}`);
+    return data.director;
+  },
   search: (q: string) => api.get('/api/directors/search', { params: { q } })
 };
 
