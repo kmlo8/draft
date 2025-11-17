@@ -97,8 +97,9 @@ router.post('/', async (req, res) => {
     });
 
     if (existingLike) {
-      console.log('Backend: Already liked by user (found existing document)');
-      return res.status(400).json({ error: 'Already liked' });
+      // If the like already exists, we can just return it without an error.
+      // The frontend will handle the state.
+      return res.status(200).json(existingLike);
     }
 
     // Create the new like
