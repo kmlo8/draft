@@ -1,77 +1,100 @@
 import axios from 'axios';
-// whi is this does not work
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+import { getAccessToken, setAccessToken } from './token';
 
-  getLikedDirectors: () => api.get('/api/user/liked-directors'),
+const apiClient = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
+});
 
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = getAccessToken();
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Auth API
+export const authAPI = {
+  login: async (credentials: any) => {
+    const { data } = await apiClient.post('/api/auth/login', credentials);
+    if (data.accessToken) {
+      setAccessToken(data.accessToken);
+    }
+    return data;
+  },
+  signup: (userData: any) => apiClient.post('/api/auth/signup', userData),
+  logout: () => {
+    apiClient.post('/api/auth/logout');
+    setAccessToken(null);
+  }
+};
+
+// User API
+export const userAPI = {
+  getProfile: () => apiClient.get('/api/user/profile'),
+  updateProfile: (profileData: any) => apiClient.patch('/api/user/profile', profileData),
+  getLikedMovies: () => apiClient.get('/api/user/liked-movies'),
+  getLikedActors: () => apiClient.get('/api/user/liked-actors'),
+  getLikedDirectors: () => apiClient.get('/api/user/liked-directors'),
   getSearchHistory: (limit = 10) =>
-    api.get('/api/user/search-history', { params: { limit } }),
-
+    apiClient.get('/api/user/search-history', { params: { limit } }),
   submitQuestionnaire: (data: any) =>
-    api.post('/api/user/questionnaire', data)
+    apiClient.post('/api/user/questionnaire', data)
 };
 
 // Movies API
 export const moviesAPI = {
   getMovie: async (id: string) => {
-    const { data } = await api.get(`/api/movies/${id}`);
-    return data.movie;
+    const { data } = await apiClient.get(`/api/movies/${id}`);
+    return data;
   },
-  getById: (id: string, tmdbId?: number) =>
-    api.get(`/api/movies/${id}`, tmdbId ? { params: { tmdbId } } : {}),
-
   search: (query: string, filters?: any) =>
-    api.get('/api/movies/search', { params: { q: query, ...filters } }),
-
+    apiClient.get('/api/movies/search', { params: { q: query, ...filters } }),
   getByGenres: (genres: string[]) =>
-    api.get('/api/movies/by-genres', { params: { genres: genres.join(',') } }),
-
+    apiClient.get('/api/movies/by-genres', { params: { genres: genres.join(',') } }),
   getNew: (limit?: number) =>
-    api.get('/api/movies/new', { params: limit ? { limit } : {} }),
-
+    apiClient.get('/api/movies/new', { params: limit ? { limit } : {} }),
   getPopular: (limit?: number) =>
-    api.get('/api/movies/popular', { params: limit ? { limit } : {} }),
-
-  trackClick: (id: string) => api.post(`/api/movies/${id}/click`)
+    apiClient.get('/api/movies/popular', { params: limit ? { limit } : {} }),
+  trackClick: (id: string) => apiClient.post(`/api/movies/${id}/click`)
 };
 
 // Likes API
 export const likesAPI = {
   create: (targetType: string, targetId: string) =>
-    api.post('/api/likes', { targetType, targetId }),
-
-  delete: (likeId: string) => api.delete(`/api/likes/${likeId}`),
-
+    apiClient.post('/api/likes', { targetType, targetId }),
   deleteByTarget: (targetType: string, targetId: string) =>
-    api.delete('/api/likes', { params: { targetType, targetId } }),
-
+    apiClient.delete('/api/likes', { params: { targetType, targetId } }),
   check: (items: { type: string; id: string }[]) =>
-    api.get('/api/likes/check', {
+    apiClient.get('/api/likes/check', {
       params: { items: JSON.stringify(items) }
     })
 };
 
 // Actors API
 export const actorsAPI = {
-  getById: (id: string) => api.get(`/api/actors/${id}`),
-  search: (q: string) => api.get('/api/actors/search', { params: { q } })
+  getById: (id: string) => apiClient.get(`/api/actors/${id}`),
+  search: (q: string) => apiClient.get('/api/actors/search', { params: { q } })
 };
 
 // Directors API
 export const directorsAPI = {
   getById: async (id: string) => {
-    const { data } = await api.get(`/api/directors/${id}`);
+    const { data } = await apiClient.get(`/api/directors/${id}`);
     return data.director;
   },
-  search: (q: string) => api.get('/api/directors/search', { params: { q } })
+  search: (q: string) => apiClient.get('/api/directors/search', { params: { q } })
 };
 
 // Recommendations API
 export const recommendationsAPI = {
   search: (query: string, userPreferences?: any) =>
-    api.post('/api/recommendations/search', { query, userPreferences }),
-
-export const getMovie = async (id: string) => {
-  const { data } = await apiClient.get(`/api/movies/${id}`);
-  return data.movie;
+    apiClient.post('/api/recommendations/search', { query, userPreferences }),
 };
+
+export default apiClient;
