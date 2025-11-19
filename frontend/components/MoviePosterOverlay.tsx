@@ -68,15 +68,28 @@ export default function MoviePosterOverlay({
         disabled={pending}
         className={`p-1.5 rounded-full transition ${
           liked 
-            ? 'bg-red-600 hover:bg-red-700 text-white' 
+            ? 'text-white'
             : 'bg-black/70 backdrop-blur-sm hover:bg-black/90 text-white'
         } disabled:opacity-50`}
+        style={{
+          backgroundColor: liked ? '#dc2626' : '',
+        }}
+        onMouseOver={(e) => {
+          if (liked) {
+            e.currentTarget.style.backgroundColor = '#c52222';
+          }
+        }}
+        onMouseOut={(e) => {
+          if (liked) {
+            e.currentTarget.style.backgroundColor = '#dc2626';
+          }
+        }}
         aria-label={liked ? '좋아요 취소' : '좋아요'}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
-          fill={liked ? 'currentColor' : 'none'}
+          fill={liked ? '#dc2626' : 'none'}
           stroke="currentColor"
           strokeWidth={2}
           className="w-4 h-4"

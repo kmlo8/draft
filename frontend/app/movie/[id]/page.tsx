@@ -7,6 +7,9 @@ import Loading from '@/components/Loading';
 import Error from '@/components/Error';
 import MovieActions from '@/components/MovieActions';
 import PersonList from '@/components/PersonList';
+import Loading from '@/components/Loading';
+import Error from '@/components/Error';
+import { getMovie } from '@/lib/api';
 
 type Movie = {
   id: string;
