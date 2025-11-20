@@ -48,23 +48,32 @@ export default function HomePage() {
   const [otherGenreSections, setOtherGenreSections] = useState<Section[]>([]);
 
   // --- Loading Indicators ---
-  const [loadingNew, setLoadingNew] = useState(true);
-  const [loadingUserGenres, setLoadingUserGenres] = useState(true);
+  const [loadingNew, setLoadingNew] = useState(false); // Default false to prevent flash
+  const [loadingUserGenres, setLoadingUserGenres] = useState(false);
   const [loadingOtherGenres, setLoadingOtherGenres] = useState(false);
 
   // --- Main Data Fetching ---
   const loadData = useCallback(async () => {
+    // 1. Wait for Auth to finish loading
     if (authLoading) return;
 
-    // 1. Always fetch "New Movies" immediately
+    // 2. FIX: If NOT authenticated, clear data and STOP here.
+    if (!isAuthenticated) {
+      setNewMovies([]);
+      setUserGenreSections([]);
+      setOtherGenreSections([]);
+      return;
+    }
+
+    // 3. If Authenticated, start fetching
     setLoadingNew(true);
     moviesAPI.getNew(20)
         .then(res => setNewMovies(res.data.movies || []))
         .catch(err => console.error('New movies failed', err))
         .finally(() => setLoadingNew(false));
 
-    // 2. Logic to split "User Liked" vs "The Rest"
-    const userPrefs = (isAuthenticated && user?.preferredGenres) ? user.preferredGenres : [];
+    // Logic to split "User Liked" vs "The Rest"
+    const userPrefs = (user?.preferredGenres) ? user.preferredGenres : [];
     const restGenres = ALL_GENRES.filter(g => !userPrefs.includes(g));
 
     // --- Phase 1: Load User Preferred Genres ---
@@ -131,7 +140,6 @@ export default function HomePage() {
   };
 
   // --- Display Name Logic ---
-  // We check if authentication is done loading, is authenticated, and user.name exists.
   const displayName = isAuthenticated && user?.name ? user.name : null;
 
   return (
@@ -145,7 +153,7 @@ export default function HomePage() {
           <div className="container mx-auto px-4 py-32 relative z-10">
             <div className="max-w-4xl mx-auto text-center">
 
-              {/* UPDATED TITLE */}
+              {/* Title */}
               <div className="mb-8 animate-fade-in-up">
                 <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
                   {displayName ? (
@@ -208,53 +216,54 @@ export default function HomePage() {
             </section>
         )}
 
-        {/* Main Carousel Rows */}
-        <div className="pb-16 relative z-10 container mx-auto px-4">
-          {/* 1. New Movies */}
-          <Carousel title="새로운 영화" movies={newMovies} loading={loadingNew} />
+        {/* Main Content: ONLY Show if Authenticated */}
+        {isAuthenticated && (
+            <div className="pb-16 relative z-10 container mx-auto px-4">
+              {/* 1. New Movies */}
+              <Carousel title="새로운 영화" movies={newMovies} loading={loadingNew} />
 
-          {/* 2. User Liked Genres */}
-          {userGenreSections.length > 0 && (
-              <div className="mt-12 mb-8">
-                <div className="flex items-center gap-2 mb-6 pl-2 border-l-4 border-red-600">
-                  <h2 className="text-2xl font-bold text-red-500">회원님을 위한 추천 장르</h2>
-                </div>
-                {userGenreSections.map(section => (
-                    <Carousel
-                        key={`user-${section.title}`}
-                        title={section.title}
-                        movies={section.movies}
-                        loading={loadingUserGenres}
-                    />
-                ))}
-              </div>
-          )}
+              {/* 2. User Liked Genres */}
+              {userGenreSections.length > 0 && (
+                  <div className="mt-12 mb-8">
+                    <div className="flex items-center gap-2 mb-6 pl-2 border-l-4 border-red-600">
+                      <h2 className="text-2xl font-bold text-red-500">회원님을 위한 추천 장르</h2>
+                    </div>
+                    {userGenreSections.map(section => (
+                        <Carousel
+                            key={`user-${section.title}`}
+                            title={section.title}
+                            movies={section.movies}
+                            loading={loadingUserGenres}
+                        />
+                    ))}
+                  </div>
+              )}
 
-          {/* 3. Other Genres */}
-          {otherGenreSections.length > 0 && (
-              <div className="mt-16 mb-8">
-                <div className="flex items-center gap-2 mb-6 pl-2 border-l-4 border-red-600">
-                  <h2 className="text-2xl font-bold text-red-500">다른 장르 탐험하기</h2>
-                </div>
-                {otherGenreSections.map(section => (
-                    <Carousel
-                        key={`other-${section.title}`}
-                        title={section.title}
-                        movies={section.movies}
-                        loading={loadingOtherGenres}
-                    />
-                ))}
-              </div>
-          )}
+              {/* 3. Other Genres */}
+              {otherGenreSections.length > 0 && (
+                  <div className="mt-16 mb-8">
+                    <div className="flex items-center gap-2 mb-6 pl-2 border-l-4 border-red-600">
+                      <h2 className="text-2xl font-bold text-red-500">다른 장르 탐험하기</h2>
+                    </div>
+                    {otherGenreSections.map(section => (
+                        <Carousel
+                            key={`other-${section.title}`}
+                            title={section.title}
+                            movies={section.movies}
+                            loading={loadingOtherGenres}
+                        />
+                    ))}
+                  </div>
+              )}
 
-          {/* Loader for Other Genres */}
-          {loadingOtherGenres && !loadingUserGenres && (
-              <div className="opacity-50 mt-12">
-                <Carousel title="다른 장르 불러오는 중..." movies={[]} loading={true} />
-              </div>
-          )}
-
-        </div>
+              {/* Loader for Other Genres */}
+              {loadingOtherGenres && !loadingUserGenres && (
+                  <div className="opacity-50 mt-12">
+                    <Carousel title="다른 장르 불러오는 중..." movies={[]} loading={true} />
+                  </div>
+              )}
+            </div>
+        )}
       </div>
   );
 }
