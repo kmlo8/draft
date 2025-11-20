@@ -5,6 +5,7 @@ const Like = require('../models/Like');
 const Search = require('../models/Search');
 const Movie = require('../models/Movie');
 const Actor = require('../models/Actor');
+const Director = require('../models/Director'); // Explicitly require Director
 const { authenticateToken } = require('../middleware/auth');
 
 // All user routes require authentication
@@ -26,6 +27,9 @@ router.get('/profile', async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
+        // --- FIX: Return name for UI ---
+        name: user.name,
+        // ------------------------------
         darkMode: user.darkMode,
         preferredGenres: user.preferredGenres,
         preferredActors: user.preferredActors,
@@ -46,7 +50,7 @@ router.get('/profile', async (req, res) => {
  */
 router.patch('/profile', async (req, res) => {
   try {
-    const { email, darkMode, preferredGenres, preferredActors, preferredDirectors, preferredYears } = req.body;
+    const { email, name, darkMode, preferredGenres, preferredActors, preferredDirectors, preferredYears } = req.body;
 
     const user = await User.findById(req.user.userId);
 
@@ -69,6 +73,12 @@ router.patch('/profile', async (req, res) => {
 
       user.email = email.toLowerCase();
     }
+
+    // --- FIX: Update Name ---
+    if (name) {
+      user.name = name;
+    }
+    // ------------------------
 
     // Update other fields if provided
     if (darkMode !== undefined) {
@@ -97,6 +107,7 @@ router.patch('/profile', async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
+        name: user.name, // Return updated name
         darkMode: user.darkMode,
         preferredGenres: user.preferredGenres,
         preferredActors: user.preferredActors,
@@ -118,26 +129,25 @@ router.get('/stats', async (req, res) => {
   try {
     const userId = req.user.userId;
 
-    // Count liked movies
+    // --- FIX: Use Capitalized Types to match new Logic ---
     const likedMoviesCount = await Like.countDocuments({
       userId,
-      targetType: 'movie'
+      targetType: 'Movie'
     });
+
+    const likedActorsCount = await Like.countDocuments({
+      userId,
+      targetType: 'Actor'
+    });
+
+    const likedDirectorsCount = await Like.countDocuments({
+      userId,
+      targetType: 'Director'
+    });
+    // ----------------------------------------------------
 
     // Count searches
     const searchesCount = await Search.countDocuments({ userId });
-
-    // Count liked actors
-    const likedActorsCount = await Like.countDocuments({
-      userId,
-      targetType: 'actor'
-    });
-
-    // Count liked directors
-    const likedDirectorsCount = await Like.countDocuments({
-      userId,
-      targetType: 'director'
-    });
 
     res.status(200).json({
       stats: {
@@ -167,17 +177,17 @@ router.get('/liked-movies', async (req, res) => {
     // Get total count
     const total = await Like.countDocuments({
       userId,
-      targetType: 'movie'
+      targetType: 'Movie' // Capitalized
     });
 
     // Get liked movies
     const likes = await Like.find({
       userId,
-      targetType: 'movie'
+      targetType: 'Movie' // Capitalized
     })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
 
     // Get movie details
     const movieIds = likes.map(like => like.targetId);
@@ -195,7 +205,7 @@ router.get('/liked-movies', async (req, res) => {
         genres: movie.genres,
         posterUrl: movie.posterUrl,
         rating: movie.rating,
-        likedAt: like.createdAt
+        likedAt: like ? like.createdAt : null
       };
     });
 
@@ -225,7 +235,7 @@ router.get('/liked-actors', async (req, res) => {
     // Get liked actors
     const likes = await Like.find({
       userId,
-      targetType: 'actor'
+      targetType: 'Actor' // Capitalized
     }).sort({ createdAt: -1 });
 
     // Get actor details
@@ -240,8 +250,8 @@ router.get('/liked-actors', async (req, res) => {
         name: actor.name,
         nameEnglish: actor.nameEnglish,
         profileUrl: actor.profileUrl,
-        movieCount: actor.movieIds.length,
-        likedAt: like.createdAt
+        movieCount: actor.movieIds ? actor.movieIds.length : 0,
+        likedAt: like ? like.createdAt : null
       };
     });
 
@@ -263,19 +273,21 @@ router.get('/liked-directors', async (req, res) => {
     // Find likes for directors
     const likes = await Like.find({
       userId,
-      targetType: 'director'
+      targetType: 'Director' // Capitalized
     }).sort({ createdAt: -1 });
 
     const directorIds = likes.map(like => like.targetId);
-    const directors = await require('../models/Director').find({ _id: { $in: directorIds } });
+    const directors = await Director.find({ _id: { $in: directorIds } });
 
     const directorsWithDetails = directors.map(director => {
+      const like = likes.find(l => l.targetId.toString() === director._id.toString());
       return {
         id: director._id,
         name: director.name,
         nameEnglish: director.nameEnglish,
         profileUrl: director.profileUrl,
-        movieCount: director.movieIds.length
+        movieCount: director.movieIds ? director.movieIds.length : 0,
+        likedAt: like ? like.createdAt : null
       };
     });
 
@@ -296,8 +308,8 @@ router.get('/search-history', async (req, res) => {
     const limit = Math.min(parseInt(req.query.limit) || 10, 50);
 
     const searches = await Search.find({ userId })
-      .sort({ searchedAt: -1 })
-      .limit(limit);
+        .sort({ searchedAt: -1 })
+        .limit(limit);
 
     const searchHistory = searches.map(search => ({
       id: search._id,
@@ -349,8 +361,8 @@ router.post('/questionnaire', async (req, res) => {
     };
 
     const normalizedGenres = Array.isArray(preferredGenres)
-      ? preferredGenres.map(g => genreMap[g] || g).filter(Boolean)
-      : [];
+        ? preferredGenres.map(g => genreMap[g] || g).filter(Boolean)
+        : [];
 
     // Update preferences (store English tags)
     user.preferredGenres = normalizedGenres;
@@ -364,6 +376,7 @@ router.post('/questionnaire', async (req, res) => {
       message: 'Preferences saved',
       user: {
         id: user._id,
+        name: user.name, // Return name here too
         preferredGenres: user.preferredGenres,
         preferredActors: user.preferredActors,
         preferredDirectors: user.preferredDirectors,

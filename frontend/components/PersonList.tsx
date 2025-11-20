@@ -97,7 +97,6 @@ export default function PersonList({ type, items }: Props) {
     };
 
     return (
-        // Grid layout for 2 columns
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {normalized.map((n) => (
                 <div key={n.id} className="flex items-center justify-between bg-white/5 rounded-lg p-3 hover:bg-white/10 transition border border-white/5">

@@ -40,13 +40,14 @@ const movieSchema = new mongoose.Schema({
     type: Number
   },
   rating: {
-    type: String
+    type: String // This is for Age Rating (e.g., "15세 관람가")
   },
-  // ADDED: This field was missing!
+  // --- FIX 1: Added voteAverage for Real Ratings (e.g. 7.3) ---
   voteAverage: {
     type: Number,
-    default: 0
+    default: 0.0
   },
+  // -----------------------------------------------------------
   cast: [{
     actorId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -54,8 +55,9 @@ const movieSchema = new mongoose.Schema({
     },
     actorName: String,
     character: String,
-    // ADDED: This field was missing!
+    // --- FIX 2: Added profileUrl for Actor Images ---
     profileUrl: String,
+    // -----------------------------------------------
     order: Number
   }],
   directors: [{
@@ -64,8 +66,9 @@ const movieSchema = new mongoose.Schema({
       ref: 'Director'
     },
     directorName: String,
-    // ADDED: This field was missing!
+    // --- FIX 3: Added profileUrl for Director Images ---
     profileUrl: String
+    // --------------------------------------------------
   }],
   likeCount: {
     type: Number,
@@ -87,7 +90,7 @@ const movieSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Create indexes
+// Create indexes for faster search and sorting
 movieSchema.index({ year: 1 });
 movieSchema.index({ genres: 1 });
 movieSchema.index({ title: 'text', titleEnglish: 'text' });

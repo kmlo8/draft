@@ -42,12 +42,15 @@ const getMovieByTmdbId = async (tmdbId) => {
     const movieData = movieResponse.data;
     const creditsData = creditsResponse.data;
 
-    // Process actors
+    // --- Process Actors ---
     const castArray = [];
     for (let i = 0; i < Math.min(creditsData.cast.length, 15); i++) {
       const castMember = creditsData.cast[i];
-      // Construct profile URL
-      const profilePath = getImageUrl(castMember.profile_path, 'w185');
+
+      // FIX: Check if path exists before generating URL to prevent broken images
+      const profilePath = castMember.profile_path
+          ? getImageUrl(castMember.profile_path, 'w185')
+          : null;
 
       // Find or create actor
       let actor = await Actor.findOne({ tmdbId: castMember.id });
@@ -55,7 +58,7 @@ const getMovieByTmdbId = async (tmdbId) => {
         actor = new Actor({
           tmdbId: castMember.id,
           name: castMember.name,
-          nameEnglish: castMember.name, // Consider using original_name if available
+          nameEnglish: castMember.original_name, // Use original_name for English/Native field
           profileUrl: profilePath
         });
         await actor.save();
@@ -65,17 +68,20 @@ const getMovieByTmdbId = async (tmdbId) => {
         actorId: actor._id,
         actorName: castMember.name,
         character: castMember.character,
-        profileUrl: profilePath, // ADDED: Save image URL to movie document directly for easier access
+        profileUrl: profilePath, // Save image URL to movie document directly
         order: castMember.order
       });
     }
 
-    // Process directors
+    // --- Process Directors ---
     const directorsArray = [];
     const directors = creditsData.crew.filter(person => person.job === 'Director');
 
     for (const directorData of directors) {
-      const profilePath = getImageUrl(directorData.profile_path, 'w185');
+      // FIX: Check if path exists
+      const profilePath = directorData.profile_path
+          ? getImageUrl(directorData.profile_path, 'w185')
+          : null;
 
       // Find or create director
       let director = await Director.findOne({ tmdbId: directorData.id });
@@ -83,7 +89,7 @@ const getMovieByTmdbId = async (tmdbId) => {
         director = new Director({
           tmdbId: directorData.id,
           name: directorData.name,
-          nameEnglish: directorData.name,
+          nameEnglish: directorData.original_name,
           profileUrl: profilePath
         });
         await director.save();
@@ -92,7 +98,7 @@ const getMovieByTmdbId = async (tmdbId) => {
       directorsArray.push({
         directorId: director._id,
         directorName: directorData.name,
-        profileUrl: profilePath // ADDED: Save image URL here too
+        profileUrl: profilePath
       });
     }
 
@@ -106,11 +112,12 @@ const getMovieByTmdbId = async (tmdbId) => {
       genresEnglish: movieData.genres.map(g => g.name),
       plot: movieData.overview,
       plotEnglish: movieData.overview,
-      posterUrl: getImageUrl(movieData.poster_path, 'w500'),
-      backdropUrl: getImageUrl(movieData.backdrop_path, 'w1280'),
+      // FIX: Check for null paths
+      posterUrl: movieData.poster_path ? getImageUrl(movieData.poster_path, 'w500') : null,
+      backdropUrl: movieData.backdrop_path ? getImageUrl(movieData.backdrop_path, 'w1280') : null,
       runtime: movieData.runtime,
       rating: movieData.adult ? '청소년 관람불가' : '전체 관람가',
-      voteAverage: movieData.vote_average, // ADDED: Map vote_average
+      voteAverage: movieData.vote_average, // Ensure rating is saved
       cast: castArray,
       directors: directorsArray,
       tmdbLastFetched: new Date()
@@ -127,18 +134,19 @@ const getMovieByTmdbId = async (tmdbId) => {
       movie = new Movie(movieDocument);
       await movie.save();
 
-      // Update actor movieIds
-      for (const cast of castArray) {
-        await Actor.findByIdAndUpdate(
-            cast.actorId,
+      // Update relations (Optimized for bulk update)
+      const actorIds = castArray.map(c => c.actorId);
+      if (actorIds.length > 0) {
+        await Actor.updateMany(
+            { _id: { $in: actorIds } },
             { $addToSet: { movieIds: movie._id } }
         );
       }
 
-      // Update director movieIds
-      for (const dir of directorsArray) {
-        await Director.findByIdAndUpdate(
-            dir.directorId,
+      const directorIds = directorsArray.map(d => d.directorId);
+      if (directorIds.length > 0) {
+        await Director.updateMany(
+            { _id: { $in: directorIds } },
             { $addToSet: { movieIds: movie._id } }
         );
       }

@@ -6,6 +6,9 @@ import { setAccessToken as setApiAccessToken, userAPI } from '@/lib/api';
 interface User {
   id: string;
   email: string;
+  // --- FIX: Added name field ---
+  name: string;
+  // ---------------------------
   darkMode: boolean;
   preferredGenres?: string[];
   preferredActors?: string[];
@@ -16,8 +19,9 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   login: (token: string, userData: User) => void;
-  logout: () => void;
+  logout: () => Promise<void>; // Updated signature to Promise
   updateUser: (userData: Partial<User>) => Promise<void>;
+  loading: boolean; // Added loading state exposure
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,10 +45,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setAccessToken(null);
       setApiAccessToken(null);
-      setUser(null); // Explicitly clear user state
+      setUser(null);
+      window.location.href = '/'; // Force redirect on logout
     }
   }, [accessToken]);
 
+  // 1. Check for existing session (Refresh Token) on load
   useEffect(() => {
     const refreshToken = async () => {
       try {
@@ -57,69 +63,72 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const data = await response.json();
           setAccessToken(data.accessToken);
           setApiAccessToken(data.accessToken);
+        } else {
+          setIsLoading(false); // Stop loading if refresh fails (not logged in)
         }
       } catch (error) {
         console.error('Initial refresh failed:', error);
-      } finally {
         setIsLoading(false);
       }
     };
-    void refreshToken();
+    refreshToken();
   }, []);
 
+  // 2. Fetch User Profile once we have an Access Token
   useEffect(() => {
     const fetchProfile = async () => {
-      if (isAuthenticated) {
+      if (accessToken) {
         try {
           const response = await userAPI.getProfile();
           setUser(response.data.user);
-          console.log('User data loaded:', response.data.user);
+          console.log('Profile loaded:', response.data.user);
         } catch (error) {
-          console.error('Failed to fetch profile, logging out:', error);
-          void logout();
+          console.error('Failed to fetch profile:', error);
+          // If profile fetch fails (e.g. invalid token), log out
+          setAccessToken(null);
+          setApiAccessToken(null);
+        } finally {
+          setIsLoading(false);
         }
       }
     };
-    void fetchProfile();
-  }, [isAuthenticated, logout]);
+
+    if (accessToken) {
+      fetchProfile();
+    }
+  }, [accessToken]);
 
   const login = (token: string, userData: User) => {
     setAccessToken(token);
     setApiAccessToken(token);
     setUser(userData);
-    console.log('User logged in:', userData);
   };
 
   const updateUser = async (userData: Partial<User>) => {
     if (!user) return;
-
-    const oldUser = user;
-    // Correctly merge the new data with the existing user object
-    const updatedUser = { ...oldUser, ...userData };
+    const updatedUser = { ...user, ...userData };
     setUser(updatedUser);
-
     try {
       const response = await userAPI.updateProfile(userData);
       setUser(response.data.user);
-      console.log('User data saved and updated:', response.data.user);
     } catch (error) {
       console.error('Failed to update user data:', error);
-      setUser(oldUser); // Revert on error
     }
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated,
-        login,
-        logout,
-        updateUser
-      }}
-    >
-      {!isLoading && children}
-    </AuthContext.Provider>
+      <AuthContext.Provider
+          value={{
+            user,
+            isAuthenticated,
+            login,
+            logout,
+            updateUser,
+            loading: isLoading
+          }}
+      >
+        {!isLoading && children}
+      </AuthContext.Provider>
   );
 };
 

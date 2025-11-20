@@ -65,6 +65,9 @@ export const moviesAPI = {
 
 // ================== LIKES API ==================
 export const likesAPI = {
+    // ADDED: Fetch all liked items (Movies, Actors, Directors)
+    getAll: () => api.get('/api/likes'),
+
     create: (targetType: string, targetId: string) =>
         api.post('/api/likes', { targetType, targetId }),
 
@@ -111,7 +114,6 @@ export const authAPI = {
     login: (email: string, password: string) =>
         api.post('/api/auth/login', { email, password }),
 
-    // UPDATED: Added 'name' to the input interface
     signup: (data: { email: string; password: string; name: string }) =>
         api.post('/api/auth/signup', data),
 

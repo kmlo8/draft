@@ -6,8 +6,9 @@ const Movie = require('../models/Movie');
 const Actor = require('../models/Actor');
 const Director = require('../models/Director');
 const { authenticateToken } = require('../middleware/auth');
+
 const getModel = (type) => {
-  const models = {Movie, Actor, Director};
+  const models = { Movie, Actor, Director };
   return models[type];
 };
 
@@ -20,21 +21,21 @@ router.use(authenticateToken);
  */
 router.get('/', async (req, res) => {
   try {
-    const userLikes = await Like.find({ userId: req.user.userId }).populate({
-      path: 'targetId',
-      model: function(doc) {
-        return doc.targetType;
-      }
-    });
+    // UPDATED: Simplified populate.
+    // This relies on "refPath: 'targetType'" being defined in the Like Schema.
+    // It automatically picks the correct model (Movie, Actor, or Director).
+    const userLikes = await Like.find({ userId: req.user.userId })
+        .populate('targetId')
+        .sort({ createdAt: -1 }); // Optional: Sort by newest likes first
 
     const formattedLikes = userLikes
-      .filter(like => like.targetId) // Filter out likes where the target has been deleted
-      .map(like => ({
-        id: like._id,
-        targetType: like.targetType,
-        targetId: like.targetId._id,
-        target: like.targetId // The populated movie/actor/director object
-      }));
+        .filter(like => like.targetId) // Filter out likes where the target has been deleted
+        .map(like => ({
+          id: like._id,
+          targetType: like.targetType,
+          targetId: like.targetId._id,
+          target: like.targetId // The populated movie/actor/director object
+        }));
 
     res.status(200).json(formattedLikes);
   } catch (error) {
@@ -49,29 +50,20 @@ router.get('/', async (req, res) => {
  */
 router.post('/', async (req, res) => {
   console.log('Backend: POST /api/likes received');
-  console.log('Request Body:', req.body);
   try {
     const { targetType, targetId } = req.body;
 
     if (!['Movie', 'Actor', 'Director'].includes(targetType)) {
-      console.log('Backend: Invalid targetType received:', targetType);
       return res.status(400).json({ error: 'Invalid targetType' });
     }
     if (!targetId) {
-      console.log('Backend: targetId is missing');
       return res.status(400).json({ error: 'targetId is required' });
     }
 
-    // let Model;
-    // switch (targetType) {
-    //   case 'Movie': Model = Movie; break;
-    //   case 'Actor': Model = Actor; break;
-    //   case 'Director': Model = Director; break;
-    // }
-
     const Model = getModel(targetType);
-
     let target;
+
+    // Handle MongoDB ID vs TMDB ID lookup
     if (mongoose.Types.ObjectId.isValid(targetId)) {
       target = await Model.findById(targetId);
     } else {
@@ -87,7 +79,6 @@ router.post('/', async (req, res) => {
     }
 
     const canonicalId = target._id;
-    console.log('Backend: Canonical ID found:', canonicalId);
 
     // Check if the like already exists
     const existingLike = await Like.findOne({
@@ -97,8 +88,6 @@ router.post('/', async (req, res) => {
     });
 
     if (existingLike) {
-      // If the like already exists, we can just return it without an error.
-      // The frontend will handle the state.
       return res.status(200).json(existingLike);
     }
 
@@ -109,10 +98,10 @@ router.post('/', async (req, res) => {
       targetId: canonicalId,
     });
 
-    console.log('Backend: Like created:', like);
+    console.log('Backend: Like created:', like._id);
 
+    // Increment like count
     await Model.findByIdAndUpdate(canonicalId, { $inc: { likeCount: 1 } });
-    console.log('Backend: Like count incremented for target:', canonicalId);
 
     res.status(201).json({
       userId: req.user.userId,
@@ -126,53 +115,37 @@ router.post('/', async (req, res) => {
 });
 
 /**
- * DELETE /api/likes/:id
- * Unlike a movie, actor, or director
- */
-
-/**
- * DELETE /api/likes (alternative - by targetType and targetId)
- * Unlike using query parameters
+ * DELETE /api/likes
+ * Unlike using query parameters (targetType, targetId)
  */
 router.delete('/', async (req, res) => {
   console.log('Backend: DELETE /api/likes (query) received');
-  console.log('Request Query:', req.query);
   try {
     const { targetType, targetId } = req.query;
 
     if (!['Movie', 'Actor', 'Director'].includes(targetType)) {
-      console.log('Backend: Invalid targetType received for DELETE (query):', targetType);
       return res.status(400).json({ error: 'Invalid targetType' });
     }
-    if (!targetId) {
-      console.log('Backend: targetId is missing for DELETE (query)');
-      return res.status(400).json({ error: 'targetId is required' });
-    }
-    
-    // The targetId from the frontend is the canonical MongoDB _id of the movie/actor/director.
-    // We can use it directly.
+
     if (!mongoose.Types.ObjectId.isValid(targetId)) {
       return res.status(400).json({ error: 'Invalid targetId format.' });
     }
 
-    // Find and delete the like in a single, atomic operation
     const deletedLike = await Like.findOneAndDelete({
       userId: req.user.userId,
       targetType,
-      targetId: targetId // Use the ID directly from the query
+      targetId: targetId
     });
 
     if (!deletedLike) {
-      console.log('Backend: Like not found for DELETE (query) with targetId:', targetId);
       return res.status(404).json({ error: 'Like not found' });
     }
 
-    console.log('Backend: Like deleted for DELETE (query):', deletedLike._id);
+    console.log('Backend: Like deleted:', deletedLike._id);
 
-    // Decrement the like count on the corresponding model
+    // Decrement the like count
     const Model = getModel(targetType);
     await Model.findByIdAndUpdate(targetId, { $inc: { likeCount: -1 } });
-    console.log('Backend: Like count decremented for DELETE (query) target:', targetId);
 
     res.status(200).json({ message: 'Like removed' });
   } catch (error) {
@@ -186,22 +159,17 @@ router.delete('/', async (req, res) => {
  * Check if user liked multiple items
  */
 router.get('/check', async (req, res) => {
-  console.log('Backend: GET /api/likes/check received');
-  console.log('Request Query:', req.query);
   try {
     const { items } = req.query;
 
     if (!items) {
-      console.log('Backend: items parameter missing for GET /api/likes/check');
       return res.status(400).json({ error: 'items parameter required' });
     }
 
     let parsedItems;
     try {
       parsedItems = JSON.parse(items);
-      console.log('Backend: Parsed items for check:', parsedItems);
     } catch (error) {
-      console.log('Backend: Invalid items format for GET /api/likes/check');
       return res.status(400).json({ error: 'Invalid items format' });
     }
 
@@ -212,11 +180,10 @@ router.get('/check', async (req, res) => {
     }));
 
     const likes = await Like.find({ $or: queries });
-    console.log('Backend: Found likes for check:', likes);
 
     // Use a Set for efficient O(1) lookups
     const likedSet = new Set(
-      likes.map(like => `${like.targetType}_${like.targetId.toString()}`)
+        likes.map(like => `${like.targetType}_${like.targetId.toString()}`)
     );
 
     const liked = {};
@@ -224,7 +191,6 @@ router.get('/check', async (req, res) => {
       const key = `${item.type}_${item.id}`;
       liked[key] = likedSet.has(key);
     }
-    console.log('Backend: Liked status map:', liked);
 
     res.status(200).json({ liked });
   } catch (error) {
