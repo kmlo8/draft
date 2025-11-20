@@ -1,11 +1,14 @@
-import type { NextConfig } from "next";
-import path from "path";
-
-const nextConfig: NextConfig = {
-  // Silence workspace root inference warning by explicitly setting Turbopack root
-  turbopack: {
-    root: path.resolve(__dirname)
-  }
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'image.tmdb.org',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

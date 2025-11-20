@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import Image from 'next/image'; // Using Next.js Image for optimization
 
 import { moviesAPI } from '@/lib/api';
 import Loading from '@/components/Loading';
@@ -20,8 +21,8 @@ type Movie = {
   posterUrl: string;
   backdropUrl: string;
   runtime: number;
-  rating: string; // "PG-13", "전체 관람가", etc.
-  voteAverage?: number; // New field: 8.3
+  rating: string;
+  voteAverage?: number; // Defines the rating field
   cast: any[];
   directors: any[];
   likeCount: number;
@@ -51,7 +52,6 @@ export default function MoviePage() {
     fetchMovie();
   }, [id]);
 
-
   if (loading) return <Loading />;
   if (error) return <ErrorComponent message={error} />;
   if (!movie) return null;
@@ -78,7 +78,14 @@ export default function MoviePage() {
             <div className="flex flex-col gap-4 w-full md:w-72 flex-shrink-0">
               <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/20 bg-gray-900 relative">
                 {movie?.posterUrl ? (
-                    <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover" />
+                    <Image
+                        src={movie.posterUrl}
+                        alt={movie.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 300px"
+                        priority
+                    />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-500">No Image</div>
                 )}
@@ -96,12 +103,11 @@ export default function MoviePage() {
               <div className="flex flex-wrap items-center gap-3 text-sm text-gray-300 mb-8">
                 {movie.year && <span className="px-3 py-1 bg-gray-800 rounded-full border border-gray-700">{movie.year}</span>}
 
-                {/* UPDATED RATING DISPLAY: Shows 8.3 / 10 */}
-                {(movie.voteAverage !== undefined) && (
-                    <span className="px-3 py-1 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-full font-medium">
-                  ★ {movie.voteAverage.toFixed(1)} / 10
+                {/* --- RATING DISPLAY --- */}
+                <span className="px-3 py-1 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-full font-medium">
+                  ★ {(movie.voteAverage || 0).toFixed(1)} / 10
                 </span>
-                )}
+                {/* ---------------------- */}
 
                 {movie.runtime && <span className="px-3 py-1 bg-gray-800 rounded-full border border-gray-700">{movie.runtime}분</span>}
 

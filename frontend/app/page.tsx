@@ -83,7 +83,6 @@ export default function HomePage() {
     setLoadingUserGenres(false);
 
     // --- Phase 2: Load Remaining Genres (Sequential) ---
-    // Only start fetching "Other" genres after determining user genres
     if (restGenres.length > 0) {
       setLoadingOtherGenres(true);
       try {
@@ -131,6 +130,10 @@ export default function HomePage() {
     }
   };
 
+  // --- Display Name Logic ---
+  // We check if authentication is done loading, is authenticated, and user.name exists.
+  const displayName = isAuthenticated && user?.name ? user.name : null;
+
   return (
       <div className="min-h-screen bg-black text-white">
         <Header />
@@ -142,19 +145,18 @@ export default function HomePage() {
           <div className="container mx-auto px-4 py-32 relative z-10">
             <div className="max-w-4xl mx-auto text-center">
 
-              {/* UPDATED: Title & Subtitle */}
+              {/* UPDATED TITLE */}
               <div className="mb-8 animate-fade-in-up">
                 <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
-                  {isAuthenticated && user?.name ? (
+                  {displayName ? (
                       <>
-                        <span className="text-red-500">{user.name}</span>님을 위한 영화를 찾아드립니다
+                        <span className="text-red-500">{displayName}</span>님을 위한 영화
                       </>
                   ) : (
-                      "당신을 위한 영화를 찾아드립니다"
+                      "당신을 위한 영화"
                   )}
                 </h1>
 
-                {/* UPDATED TEXT HERE */}
                 {isAuthenticated ? (
                     <p className="text-xl md:text-2xl text-gray-300 font-light">
                       선호하는 취향과 오늘의 기분에 맞춰 엄선된 추천작을 만나보세요.
@@ -208,7 +210,6 @@ export default function HomePage() {
 
         {/* Main Carousel Rows */}
         <div className="pb-16 relative z-10 container mx-auto px-4">
-
           {/* 1. New Movies */}
           <Carousel title="새로운 영화" movies={newMovies} loading={loadingNew} />
 
