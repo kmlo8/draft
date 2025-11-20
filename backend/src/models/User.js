@@ -14,6 +14,13 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Password is required'],
     minlength: [6, 'Password must be at least 6 characters']
   },
+  // ADDED: Nickname field
+  name: {
+    type: String,
+    required: [true, 'Nickname is required'],
+    trim: true,
+    maxlength: [20, 'Nickname cannot be more than 20 characters']
+  },
   preferredGenres: {
     type: [String],
     default: []
@@ -51,9 +58,6 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Create indexes
-// userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ refreshToken: 1 });
 
-// Export the model
 module.exports = mongoose.model('User', userSchema);

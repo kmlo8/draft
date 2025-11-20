@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { notFound } from 'next/navigation';
 import { useParams } from 'next/navigation';
 
 import { moviesAPI } from '@/lib/api';
@@ -9,7 +8,6 @@ import Loading from '@/components/Loading';
 import ErrorComponent from '@/components/Error';
 import MovieActions from '@/components/MovieActions';
 import PersonList from '@/components/PersonList';
-// import { getMovie } from '@/lib/api';
 
 type Movie = {
   id: string;
@@ -22,7 +20,8 @@ type Movie = {
   posterUrl: string;
   backdropUrl: string;
   runtime: number;
-  rating: string;
+  rating: string; // "PG-13", "전체 관람가", etc.
+  voteAverage?: number; // New field: 8.3
   cast: any[];
   directors: any[];
   likeCount: number;
@@ -30,13 +29,9 @@ type Movie = {
   userLiked: boolean;
 };
 
-type Props = {
-  params: { id: string };
-};
-
 export default function MoviePage() {
-  const params = useParams(); // Next.js hook
-  const id = params.id;       // now id is safe to use
+  const params = useParams();
+  const id = params.id as string;
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,77 +57,84 @@ export default function MoviePage() {
   if (!movie) return null;
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Backdrop hero */}
-      <div
-        className="relative w-full h-[40vh] md:h-[55vh]"
-        style={{
-          backgroundImage: movie?.backdropUrl ? `url(${movie.backdropUrl})` : 'none',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/50 to-black" />
-      </div>
-
-      {/* Content */}
-      <section className="container mx-auto px-4 -mt-24 md:-mt-32 pb-16 relative z-10">
-        <div className="flex items-start justify-between mb-4">
-          <MovieActions movieId={String(movie.id)} initiallyLiked={Boolean(movie.userLiked)} />
+      <div className="min-h-screen bg-black text-white pb-20">
+        {/* Backdrop hero */}
+        <div
+            className="relative w-full h-[40vh] md:h-[55vh]"
+            style={{
+              backgroundImage: movie?.backdropUrl ? `url(${movie.backdropUrl})` : 'none',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center top'
+            }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black" />
         </div>
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Poster */}
-          <div className="w-full md:w-60 lg:w-72 flex-shrink-0">
-            <div className="aspect-[2/3] rounded-lg overflow-hidden ring-1 ring-white/10 bg-gray-900">
-              {movie?.posterUrl ? (
-                <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-500">No Image</div>
+
+        {/* Content */}
+        <section className="container mx-auto px-4 -mt-32 relative z-10">
+          <div className="flex flex-col md:flex-row gap-10">
+
+            {/* Left Column: Poster */}
+            <div className="flex flex-col gap-4 w-full md:w-72 flex-shrink-0">
+              <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/20 bg-gray-900 relative">
+                {movie?.posterUrl ? (
+                    <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover" />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-500">No Image</div>
+                )}
+              </div>
+              <div className="flex justify-center">
+                <MovieActions movieId={String(movie.id)} initiallyLiked={Boolean(movie.userLiked)} />
+              </div>
+            </div>
+
+            {/* Right Column: Details */}
+            <div className="flex-1 pt-2 md:pt-8">
+              <h1 className="text-4xl md:text-5xl font-bold mb-2 leading-tight">{movie.title}</h1>
+              {movie.titleEnglish && <p className="text-xl text-gray-400 mb-6 font-light">{movie.titleEnglish}</p>}
+
+              <div className="flex flex-wrap items-center gap-3 text-sm text-gray-300 mb-8">
+                {movie.year && <span className="px-3 py-1 bg-gray-800 rounded-full border border-gray-700">{movie.year}</span>}
+
+                {/* UPDATED RATING DISPLAY: Shows 8.3 / 10 */}
+                {(movie.voteAverage !== undefined) && (
+                    <span className="px-3 py-1 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-full font-medium">
+                  ★ {movie.voteAverage.toFixed(1)} / 10
+                </span>
+                )}
+
+                {movie.runtime && <span className="px-3 py-1 bg-gray-800 rounded-full border border-gray-700">{movie.runtime}분</span>}
+
+                {Array.isArray(movie.genres) && movie.genres.map((g: string) => (
+                    <span key={g} className="px-3 py-1 bg-gray-800 rounded-full border border-gray-700">{g}</span>
+                ))}
+              </div>
+
+              {movie.plot && (
+                  <div className="mb-10">
+                    <h2 className="text-lg font-bold text-white mb-3 border-l-4 border-red-600 pl-3">줄거리</h2>
+                    <p className="text-gray-300 leading-relaxed text-lg">{movie.plot}</p>
+                  </div>
+              )}
+
+              {/* Directors */}
+              {Array.isArray(movie.directors) && movie.directors.length > 0 && (
+                  <div className="mb-10">
+                    <h3 className="text-lg font-bold text-white mb-4 border-l-4 border-red-600 pl-3">감독</h3>
+                    <PersonList type="Director" items={movie.directors} />
+                  </div>
+              )}
+
+              {/* Cast */}
+              {Array.isArray(movie.cast) && movie.cast.length > 0 && (
+                  <div className="mb-10">
+                    <h3 className="text-lg font-bold text-white mb-4 border-l-4 border-red-600 pl-3">출연진</h3>
+                    <PersonList type="Actor" items={movie.cast.slice(0, 12)} />
+                  </div>
               )}
             </div>
           </div>
-
-          {/* Details */}
-          <div className="flex-1">
-            <h1 className="text-3xl md:text-5xl font-bold mb-2 movie-title">{movie.title}</h1>
-            <p className="mb-4 movie-subtitle">{movie.titleEnglish}</p>
-
-            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-300 mb-6">
-              {movie.year && <span className="px-2 py-1 bg-white/10 rounded">{movie.year}</span>}
-              {Array.isArray(movie.genres) && movie.genres.map((g: string) => (
-                <span key={g} className="px-2 py-1 bg-white/10 rounded">{g}</span>
-              ))}
-            </div>
-
-            {movie.plot && (
-              <div className="mb-8">
-                <h2 className="text-lg font-semibold mb-2">줄거리</h2>
-                <p className="text-gray-300 leading-relaxed">{movie.plot}</p>
-              </div>
-            )}
-
-            {/* Directors */}
-            {Array.isArray(movie.directors) && movie.directors.length > 0 && (
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold">감독</h3>
-                </div>
-                <PersonList type="Director" items={movie.directors} />
-              </div>
-            )}
-
-            {/* Cast */}
-            {Array.isArray(movie.cast) && movie.cast.length > 0 && (
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold">출연</h3>
-                </div>
-                <PersonList type="Actor" items={movie.cast.slice(0, 12)} />
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
   );
 }

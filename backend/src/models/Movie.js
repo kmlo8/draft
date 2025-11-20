@@ -42,6 +42,11 @@ const movieSchema = new mongoose.Schema({
   rating: {
     type: String
   },
+  // ADDED: This field was missing!
+  voteAverage: {
+    type: Number,
+    default: 0
+  },
   cast: [{
     actorId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -49,6 +54,8 @@ const movieSchema = new mongoose.Schema({
     },
     actorName: String,
     character: String,
+    // ADDED: This field was missing!
+    profileUrl: String,
     order: Number
   }],
   directors: [{
@@ -56,7 +63,9 @@ const movieSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Director'
     },
-    directorName: String
+    directorName: String,
+    // ADDED: This field was missing!
+    profileUrl: String
   }],
   likeCount: {
     type: Number,
@@ -79,7 +88,6 @@ const movieSchema = new mongoose.Schema({
 });
 
 // Create indexes
-// movieSchema.index({ tmdbId: 1 }, { unique: true });
 movieSchema.index({ year: 1 });
 movieSchema.index({ genres: 1 });
 movieSchema.index({ title: 'text', titleEnglish: 'text' });

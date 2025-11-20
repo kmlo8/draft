@@ -16,7 +16,8 @@ const { authenticateToken } = require('../middleware/auth');
  */
 router.post('/signup', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    // UPDATED: Destructure name
+    const { email, password, name } = req.body;
 
     // Validation
     if (!email) {
@@ -29,6 +30,11 @@ router.post('/signup', async (req, res) => {
 
     if (!password) {
       return res.status(400).json({ error: 'Password is required' });
+    }
+
+    // UPDATED: Validate name
+    if (!name) {
+      return res.status(400).json({ error: 'Nickname is required' });
     }
 
     if (password.length < 6) {
@@ -48,6 +54,7 @@ router.post('/signup', async (req, res) => {
     const user = new User({
       email: email.toLowerCase(),
       password: hashedPassword,
+      name: name, // UPDATED: Save name
       darkMode: true,
       preferredGenres: [],
       preferredActors: [],
@@ -78,6 +85,7 @@ router.post('/signup', async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
+        name: user.name, // UPDATED: Return name
         darkMode: user.darkMode
       }
     });
@@ -95,17 +103,17 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-  // Find user (return 404 if account does not exist)
-  const user = await User.findOne({ email: email.toLowerCase() });
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
+    // Find user (return 404 if account does not exist)
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
     // Compare passwords
     const isMatch = await comparePassword(password, user.password);
-  if (!isMatch) {
-    return res.status(401).json({ error: 'Invalid credentials' });
-  }
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
     // Generate new tokens
     const accessToken = generateAccessToken(user._id.toString(), user.email);
@@ -129,6 +137,7 @@ router.post('/login', async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
+        name: user.name, // UPDATED: Return name
         darkMode: user.darkMode,
         preferredGenres: user.preferredGenres
       }

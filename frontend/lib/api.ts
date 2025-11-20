@@ -21,9 +21,9 @@ export const setAccessToken = (token: string | null) => {
 
 // ================== USER API ==================
 export const userAPI = {
-    getStats: () => api.get('/api/user/stats'), // new
-    getLikedMovies: () => api.get('/api/user/liked-movies'), // new
-    getLikedActors: () => api.get('/api/user/liked-actors'), // new
+    getStats: () => api.get('/api/user/stats'),
+    getLikedMovies: () => api.get('/api/user/liked-movies'),
+    getLikedActors: () => api.get('/api/user/liked-actors'),
     getLikedDirectors: () => api.get('/api/user/liked-directors'),
 
     getSearchHistory: (limit = 10) =>
@@ -34,7 +34,6 @@ export const userAPI = {
 
     getProfile: () => api.get('/api/user/profile'),
     updateProfile: (data: any) => api.patch('/api/user/profile', data),
-
 };
 
 // ================== MOVIES API ==================
@@ -106,10 +105,15 @@ export const recommendationsAPI = {
             userPreferences
         })
 };
+
 // ================== AUTH API ==================
 export const authAPI = {
     login: (email: string, password: string) =>
         api.post('/api/auth/login', { email, password }),
+
+    // UPDATED: Added 'name' to the input interface
+    signup: (data: { email: string; password: string; name: string }) =>
+        api.post('/api/auth/signup', data),
 
     logout: () =>
         api.post('/api/auth/logout'),
