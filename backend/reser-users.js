@@ -1,26 +1,23 @@
-// backend/reset-users.js
-require('dotenv').config(); // Make sure you have dotenv installed
+require('dotenv').config();
 const mongoose = require('mongoose');
-const User = require('./src/models/User'); // Adjust path if your structure is different
+// Adjust these paths if your folder structure is different
+const User = require('./src/models/User');
 const Like = require('./src/models/Like');
 
 const resetData = async () => {
     try {
-        // Connect to DB
-        await mongoose.connect(process.env.MONGODB_URI);
-        console.log('🔌 Connected to MongoDB...');
+        console.log('⏳ Connecting to database...');
+        // Ensure we use the URI from .env or fallback to local default
+        await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/movieflix');
+        console.log('🔌 Connected to MongoDB.');
 
         // 1. Delete All Users
         const userResult = await User.deleteMany({});
         console.log(`✅ Deleted ${userResult.deletedCount} Users.`);
 
-        // 2. Delete All Likes (Since they belong to deleted users)
+        // 2. Delete All Likes
         const likeResult = await Like.deleteMany({});
         console.log(`✅ Deleted ${likeResult.deletedCount} Likes.`);
-
-        // Optional: Uncomment this if you want to wipe Movies too
-        // const movieResult = await Movie.deleteMany({});
-        // console.log(`✅ Deleted ${movieResult.deletedCount} Movies.`);
 
         console.log('✨ Database reset complete!');
         process.exit(0);
