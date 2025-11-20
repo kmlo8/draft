@@ -675,7 +675,6 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$dr
 var __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/Desktop/aaaaaaaaaaa/draft/frontend/lib/api.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$components$2f$Header$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/Desktop/aaaaaaaaaaa/draft/frontend/components/Header.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$components$2f$Carousel$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/Desktop/aaaaaaaaaaa/draft/frontend/components/Carousel.tsx [app-client] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$axios$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/Desktop/aaaaaaaaaaa/draft/frontend/node_modules/axios/index.js [app-client] (ecmascript) <locals>");
 ;
 var _s = __turbopack_context__.k.signature();
 'use client';
@@ -686,115 +685,99 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
-;
-const genreMapToKorean = {
-    'Action': '액션',
-    'Drama': '드라마',
-    'Comedy': '코미디',
-    'Romance': '로맨스',
-    'Thriller': '스릴러',
-    'Horror': '공포',
-    'Science Fiction': 'SF',
-    'Fantasy': '판타지',
-    'Animation': '애니메이션',
-    'Documentary': '다큐멘터리',
-    'Crime': '범죄',
-    'Family': '가족'
-};
+// Master list of genres in Korean to match DB
+const ALL_GENRES = [
+    '액션',
+    '드라마',
+    '코미디',
+    '로맨스',
+    '스릴러',
+    '공포',
+    'SF',
+    '판타지',
+    '애니메이션',
+    '다큐멘터리',
+    '범죄',
+    '가족'
+];
 function HomePage() {
     _s();
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
-    const { user, isAuthenticated } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$context$2f$AuthContext$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuth"])();
+    const { user, isAuthenticated, loading: authLoading } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$context$2f$AuthContext$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuth"])();
+    // --- Search State ---
     const [query, setQuery] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])('');
     const [searchResults, setSearchResults] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     const [hasSearched, setHasSearched] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [loadingSearch, setLoadingSearch] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [searchError, setSearchError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])('');
+    // --- Content State ---
     const [newMovies, setNewMovies] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
-    // Split state to manage loading independently
     const [userGenreSections, setUserGenreSections] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     const [otherGenreSections, setOtherGenreSections] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
-    const [loadingNewMovies, setLoadingNewMovies] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
-    const [loadingUserGenres, setLoadingUserGenres] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    // --- Loading Indicators ---
+    const [loadingNew, setLoadingNew] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
+    const [loadingUserGenres, setLoadingUserGenres] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
     const [loadingOtherGenres, setLoadingOtherGenres] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
-    // Helper to map API response to Korean titles
-    const mapToKorean = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "HomePage.useCallback[mapToKorean]": (section)=>({
-                ...section,
-                title: genreMapToKorean[section.title] || section.title,
-                originalTitle: section.title
-            })
-    }["HomePage.useCallback[mapToKorean]"], []);
-    const loadNewMovies = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "HomePage.useCallback[loadNewMovies]": async ()=>{
-            setLoadingNewMovies(true);
-            try {
-                const response = await __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["moviesAPI"].getNew(20);
-                setNewMovies(response.data.movies || []);
-            } catch (err) {
-                console.error('Failed to load new movies:', err);
-                setNewMovies([]);
-            } finally{
-                setLoadingNewMovies(false);
-            }
-        }
-    }["HomePage.useCallback[loadNewMovies]"], []);
-    const loadGenreMovies = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "HomePage.useCallback[loadGenreMovies]": async ()=>{
-            // 1. Identify Genres
-            const allGenres = Object.keys(genreMapToKorean);
-            const userGenres = isAuthenticated && user?.preferredGenres ? user.preferredGenres : [];
-            const restGenres = allGenres.filter({
-                "HomePage.useCallback[loadGenreMovies].restGenres": (g)=>!userGenres.includes(g)
-            }["HomePage.useCallback[loadGenreMovies].restGenres"]);
-            // --- PHASE 1: Load User Genres (High Priority) ---
+    // --- Main Data Fetching ---
+    const loadData = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "HomePage.useCallback[loadData]": async ()=>{
+            if (authLoading) return;
+            // 1. Always fetch "New Movies" immediately
+            setLoadingNew(true);
+            __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["moviesAPI"].getNew(20).then({
+                "HomePage.useCallback[loadData]": (res)=>setNewMovies(res.data.movies || [])
+            }["HomePage.useCallback[loadData]"]).catch({
+                "HomePage.useCallback[loadData]": (err)=>console.error('New movies failed', err)
+            }["HomePage.useCallback[loadData]"]).finally({
+                "HomePage.useCallback[loadData]": ()=>setLoadingNew(false)
+            }["HomePage.useCallback[loadData]"]);
+            // 2. Logic to split "User Liked" vs "The Rest"
+            const userPrefs = isAuthenticated && user?.preferredGenres ? user.preferredGenres : [];
+            const restGenres = ALL_GENRES.filter({
+                "HomePage.useCallback[loadData].restGenres": (g)=>!userPrefs.includes(g)
+            }["HomePage.useCallback[loadData].restGenres"]);
+            // --- Phase 1: Load User Preferred Genres ---
             setLoadingUserGenres(true);
-            if (userGenres.length > 0) {
+            if (userPrefs.length > 0) {
                 try {
-                    const response = await __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["moviesAPI"].getByGenres(userGenres);
+                    const response = await __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["moviesAPI"].getByGenres(userPrefs);
                     const sections = response.data.sections || [];
-                    setUserGenreSections(sections.map(mapToKorean));
+                    setUserGenreSections(sections);
                 } catch (err) {
-                    console.error('Failed to load user genre movies:', err);
-                    setUserGenreSections([]);
+                    console.error('User genres failed:', err);
                 }
             } else {
                 setUserGenreSections([]);
             }
             setLoadingUserGenres(false);
-            // --- PHASE 2: Load Remaining Genres (Low Priority) ---
-            setLoadingOtherGenres(true);
+            // --- Phase 2: Load Remaining Genres (Sequential) ---
+            // Only start fetching "Other" genres after determining user genres
             if (restGenres.length > 0) {
+                setLoadingOtherGenres(true);
                 try {
                     const response = await __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["moviesAPI"].getByGenres(restGenres);
                     const sections = response.data.sections || [];
-                    setOtherGenreSections(sections.map(mapToKorean));
+                    setOtherGenreSections(sections);
                 } catch (err) {
-                    console.error('Failed to load other genre movies:', err);
-                    setOtherGenreSections([]);
+                    console.error('Other genres failed:', err);
+                } finally{
+                    setLoadingOtherGenres(false);
                 }
-            } else {
-                setOtherGenreSections([]);
             }
-            setLoadingOtherGenres(false);
         }
-    }["HomePage.useCallback[loadGenreMovies]"], [
+    }["HomePage.useCallback[loadData]"], [
         isAuthenticated,
-        user?.preferredGenres,
-        mapToKorean
+        user,
+        authLoading
     ]);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "HomePage.useEffect": ()=>{
-            void loadNewMovies();
-            void loadGenreMovies();
+            loadData();
         }
     }["HomePage.useEffect"], [
-        loadNewMovies,
-        loadGenreMovies
+        loadData
     ]);
-    const handleLikeChange = ()=>{
-    // Optional: Refresh logic
-    };
+    // --- Search Handler ---
     const handleSearch = async (e)=>{
         e.preventDefault();
         if (!isAuthenticated) {
@@ -807,23 +790,15 @@ function HomePage() {
         setHasSearched(true);
         try {
             const profileRes = await __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["userAPI"].getProfile();
-            const userPrefs = profileRes.data?.user ? {
-                genres: profileRes.data.user.preferredGenres || [],
-                actors: profileRes.data.user.preferredActors || [],
-                years: profileRes.data.user.preferredYears || {
-                    min: 1990,
-                    max: 2024
-                }
-            } : {};
-            const response = await __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["recommendationsAPI"].search(query, userPrefs);
+            const userPrefs = profileRes.data?.user || {};
+            const response = await __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["recommendationsAPI"].search(query, {
+                genres: userPrefs.preferredGenres,
+                actors: userPrefs.preferredActors,
+                years: userPrefs.preferredYears
+            });
             setSearchResults(response.data.movies || []);
         } catch (err) {
-            if (err instanceof __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$axios$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["AxiosError"] && err.response?.status === 503) {
-                setSearchError('추천 서비스를 사용할 수 없습니다.');
-            } else {
-                setSearchError('검색에 실패했습니다.');
-            }
-            setSearchResults([]);
+            setSearchError('검색에 실패했습니다.');
         } finally{
             setLoadingSearch(false);
             setQuery('');
@@ -834,18 +809,18 @@ function HomePage() {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$components$2f$Header$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                lineNumber: 158,
+                lineNumber: 136,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
                 id: "search",
-                className: "relative min-h-[70vh] flex items-center justify-center",
+                className: "relative min-h-[60vh] flex items-center justify-center",
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "absolute inset-0 bg-gradient-to-b from-blue-900/20 to-black"
                     }, void 0, false, {
                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                        lineNumber: 160,
+                        lineNumber: 140,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -856,36 +831,61 @@ function HomePage() {
                         }
                     }, void 0, false, {
                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                        lineNumber: 161,
+                        lineNumber: 141,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "container mx-auto px-4 py-32 relative z-10",
                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "max-w-3xl mx-auto text-center",
+                            className: "max-w-4xl mx-auto text-center",
                             children: [
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
-                                    className: "text-5xl md:text-6xl font-bold mb-6",
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    className: "mb-8 animate-fade-in-up",
                                     children: [
-                                        isAuthenticated && user?.name ? `${user.name}님` : '당신',
-                                        "을 위한 완벽한 영화를 찾아드립니다"
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
+                                            className: "text-4xl md:text-6xl font-bold mb-4 leading-tight",
+                                            children: isAuthenticated && user?.name ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                        className: "text-red-500",
+                                                        children: user.name
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
+                                                        lineNumber: 150,
+                                                        columnNumber: 25
+                                                    }, this),
+                                                    "님을 위한 영화를 찾아드립니다"
+                                                ]
+                                            }, void 0, true) : "당신을 위한 영화를 찾아드립니다"
+                                        }, void 0, false, {
+                                            fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
+                                            lineNumber: 147,
+                                            columnNumber: 17
+                                        }, this),
+                                        isAuthenticated ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                            className: "text-xl md:text-2xl text-gray-300 font-light",
+                                            children: "선호하는 취향과 오늘의 기분에 맞춰 엄선된 추천작을 만나보세요."
+                                        }, void 0, false, {
+                                            fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
+                                            lineNumber: 159,
+                                            columnNumber: 21
+                                        }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                            className: "text-xl md:text-2xl text-gray-300 font-light",
+                                            children: "오늘 당신의 마음을 움직일 특별한 이야기를 준비했습니다."
+                                        }, void 0, false, {
+                                            fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
+                                            lineNumber: 163,
+                                            columnNumber: 21
+                                        }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                                    lineNumber: 164,
-                                    columnNumber: 15
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                    className: "text-xl text-gray-300 mb-12",
-                                    children: "지금 보고 싶은 영화를 검색해보세요"
-                                }, void 0, false, {
-                                    fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                                    lineNumber: 167,
+                                    lineNumber: 146,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
                                     onSubmit: handleSearch,
-                                    className: "flex gap-4",
+                                    className: "flex gap-4 mt-8",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                             type: "text",
@@ -895,142 +895,104 @@ function HomePage() {
                                             className: "flex-1 px-6 py-4 bg-gray-800/50 backdrop-blur border border-gray-700 rounded-lg focus:outline-none focus:border-red-500 text-lg"
                                         }, void 0, false, {
                                             fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                                            lineNumber: 169,
+                                            lineNumber: 170,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                             type: "submit",
                                             disabled: loadingSearch,
                                             className: "px-8 py-4 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition disabled:opacity-50",
-                                            children: loadingSearch ? '검색 중...' : '추천받기'
+                                            children: loadingSearch ? '...' : '검색'
                                         }, void 0, false, {
                                             fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                                            lineNumber: 170,
+                                            lineNumber: 177,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                                    lineNumber: 168,
+                                    lineNumber: 169,
                                     columnNumber: 15
                                 }, this),
                                 searchError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "mt-4 bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded",
+                                    className: "mt-4 text-red-500",
                                     children: searchError
                                 }, void 0, false, {
                                     fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                                    lineNumber: 172,
+                                    lineNumber: 185,
                                     columnNumber: 31
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                            lineNumber: 163,
+                            lineNumber: 143,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                        lineNumber: 162,
+                        lineNumber: 142,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                lineNumber: 159,
+                lineNumber: 139,
                 columnNumber: 9
             }, this),
             hasSearched && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
-                className: "container mx-auto px-4 py-16 -mt-20 relative z-10",
+                className: "container mx-auto px-4 py-8 relative z-10",
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
-                        className: "text-3xl font-bold mb-8",
+                        className: "text-2xl font-bold mb-6",
                         children: "검색 결과"
                     }, void 0, false, {
                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                        lineNumber: 179,
+                        lineNumber: 193,
                         columnNumber: 15
                     }, this),
-                    loadingSearch ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "text-center py-16",
-                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                            className: "text-gray-400",
-                            children: "추천 영화를 불러오는 중..."
-                        }, void 0, false, {
-                            fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                            lineNumber: 181,
-                            columnNumber: 54
-                        }, this)
+                    loadingSearch ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                        children: "검색 중..."
                     }, void 0, false, {
                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                        lineNumber: 181,
-                        columnNumber: 19
-                    }, this) : searchResults.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6",
+                        lineNumber: 194,
+                        columnNumber: 32
+                    }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "grid grid-cols-2 md:grid-cols-5 gap-4",
                         children: searchResults.map((movie)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 onClick: ()=>router.push(`/movie/${movie.id}`),
-                                className: "cursor-pointer",
+                                className: "cursor-pointer group",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "relative aspect-[2/3] bg-gray-800 rounded-lg overflow-hidden mb-3 hover:ring-2 hover:ring-red-500 transition",
-                                        children: movie.posterUrl ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                        className: "relative aspect-[2/3] bg-gray-800 rounded overflow-hidden mb-2",
+                                        children: movie.posterUrl && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                             src: movie.posterUrl,
                                             alt: movie.title,
-                                            width: 180,
-                                            height: 270,
-                                            className: "w-full h-full object-cover"
+                                            fill: true,
+                                            className: "object-cover group-hover:scale-105 transition"
                                         }, void 0, false, {
                                             fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                                            lineNumber: 187,
-                                            columnNumber: 48
-                                        }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "w-full h-full flex items-center justify-center text-gray-500",
-                                            children: "No Image"
-                                        }, void 0, false, {
-                                            fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                                            lineNumber: 187,
-                                            columnNumber: 164
+                                            lineNumber: 199,
+                                            columnNumber: 49
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                                        lineNumber: 186,
+                                        lineNumber: 198,
                                         columnNumber: 27
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                                        className: "font-medium line-clamp-2",
+                                        className: "text-sm font-medium",
                                         children: movie.title
                                     }, void 0, false, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                                        lineNumber: 189,
-                                        columnNumber: 27
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                        className: "text-sm text-gray-400",
-                                        children: movie.year
-                                    }, void 0, false, {
-                                        fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                                        lineNumber: 190,
+                                        lineNumber: 201,
                                         columnNumber: 27
                                     }, this)
                                 ]
                             }, movie.id, true, {
                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                                lineNumber: 185,
+                                lineNumber: 197,
                                 columnNumber: 25
                             }, this))
-                    }, void 0, false, {
-                        fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                        lineNumber: 183,
-                        columnNumber: 19
-                    }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "text-center py-16",
-                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                            className: "text-gray-400 text-lg",
-                            children: "추천 영화를 찾을 수 없습니다"
-                        }, void 0, false, {
-                            fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                            lineNumber: 195,
-                            columnNumber: 54
-                        }, this)
                     }, void 0, false, {
                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
                         lineNumber: 195,
@@ -1039,70 +1001,117 @@ function HomePage() {
                 ]
             }, void 0, true, {
                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                lineNumber: 178,
+                lineNumber: 192,
                 columnNumber: 13
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: `pb-16 relative z-10 ${hasSearched ? 'pt-8' : '-mt-20'}`,
+                className: "pb-16 relative z-10 container mx-auto px-4",
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$components$2f$Carousel$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                         title: "새로운 영화",
                         movies: newMovies,
-                        loading: loadingNewMovies,
-                        onLikeChange: handleLikeChange
+                        loading: loadingNew
                     }, void 0, false, {
                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                        lineNumber: 202,
+                        lineNumber: 213,
                         columnNumber: 11
                     }, this),
-                    userGenreSections.map((section)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$components$2f$Carousel$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                            title: section.title,
-                            movies: section.movies,
-                            loading: loadingUserGenres,
-                            onLikeChange: handleLikeChange
-                        }, `user-genre-${section.originalTitle}`, false, {
-                            fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                            lineNumber: 206,
-                            columnNumber: 15
-                        }, this)),
-                    otherGenreSections.map((section)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$components$2f$Carousel$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                            title: section.title,
-                            movies: section.movies,
-                            loading: loadingOtherGenres,
-                            onLikeChange: handleLikeChange
-                        }, `other-genre-${section.originalTitle}`, false, {
-                            fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                            lineNumber: 217,
-                            columnNumber: 15
-                        }, this)),
-                    !isAuthenticated && !loadingUserGenres && !loadingOtherGenres && userGenreSections.length === 0 && otherGenreSections.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "container mx-auto px-4 py-8 text-center text-gray-400",
-                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                            children: "로그인하시면 맞춤형 추천을 해드립니다."
+                    userGenreSections.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "mt-12 mb-8",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center gap-2 mb-6 pl-2 border-l-4 border-red-600",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
+                                    className: "text-2xl font-bold text-red-500",
+                                    children: "회원님을 위한 추천 장르"
+                                }, void 0, false, {
+                                    fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
+                                    lineNumber: 219,
+                                    columnNumber: 19
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
+                                lineNumber: 218,
+                                columnNumber: 17
+                            }, this),
+                            userGenreSections.map((section)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$components$2f$Carousel$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                    title: section.title,
+                                    movies: section.movies,
+                                    loading: loadingUserGenres
+                                }, `user-${section.title}`, false, {
+                                    fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
+                                    lineNumber: 222,
+                                    columnNumber: 21
+                                }, this))
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
+                        lineNumber: 217,
+                        columnNumber: 15
+                    }, this),
+                    otherGenreSections.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "mt-16 mb-8",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center gap-2 mb-6 pl-2 border-l-4 border-red-600",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
+                                    className: "text-2xl font-bold text-red-500",
+                                    children: "다른 장르 탐험하기"
+                                }, void 0, false, {
+                                    fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
+                                    lineNumber: 236,
+                                    columnNumber: 19
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
+                                lineNumber: 235,
+                                columnNumber: 17
+                            }, this),
+                            otherGenreSections.map((section)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$components$2f$Carousel$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                    title: section.title,
+                                    movies: section.movies,
+                                    loading: loadingOtherGenres
+                                }, `other-${section.title}`, false, {
+                                    fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
+                                    lineNumber: 239,
+                                    columnNumber: 21
+                                }, this))
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
+                        lineNumber: 234,
+                        columnNumber: 15
+                    }, this),
+                    loadingOtherGenres && !loadingUserGenres && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "opacity-50 mt-12",
+                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$components$2f$Carousel$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                            title: "다른 장르 불러오는 중...",
+                            movies: [],
+                            loading: true
                         }, void 0, false, {
                             fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                            lineNumber: 228,
+                            lineNumber: 252,
                             columnNumber: 17
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                        lineNumber: 227,
+                        lineNumber: 251,
                         columnNumber: 15
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-                lineNumber: 200,
+                lineNumber: 210,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/page.tsx",
-        lineNumber: 157,
+        lineNumber: 135,
         columnNumber: 7
     }, this);
 }
-_s(HomePage, "SMnkLS/WaPXo2q4oswh8KjZ98eQ=", false, function() {
+_s(HomePage, "V150ccKPPRsYFm+O/7ms5vjCDH0=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"],
         __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$context$2f$AuthContext$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuth"]

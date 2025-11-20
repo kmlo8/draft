@@ -7,8 +7,8 @@ import { useAuth } from '@/context/AuthContext';
 import { recommendationsAPI, userAPI, moviesAPI } from '@/lib/api';
 import Header from '@/components/Header';
 import Carousel from '@/components/Carousel';
-import { AxiosError } from 'axios';
 
+// Define types locally
 interface Movie {
   id: number;
   title: string;
@@ -25,101 +25,84 @@ interface Section {
   originalTitle?: string;
 }
 
-const genreMapToKorean: Record<string, string> = {
-  'Action': '액션', 'Drama': '드라마', 'Comedy': '코미디', 'Romance': '로맨스',
-  'Thriller': '스릴러', 'Horror': '공포', 'Science Fiction': 'SF', 'Fantasy': '판타지',
-  'Animation': '애니메이션', 'Documentary': '다큐멘터리', 'Crime': '범죄', 'Family': '가족'
-};
+// Master list of genres in Korean to match DB
+const ALL_GENRES = [
+  '액션', '드라마', '코미디', '로맨스', '스릴러', '공포',
+  'SF', '판타지', '애니메이션', '다큐멘터리', '범죄', '가족'
+];
 
 export default function HomePage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
 
+  // --- Search State ---
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [searchError, setSearchError] = useState('');
 
+  // --- Content State ---
   const [newMovies, setNewMovies] = useState<Movie[]>([]);
-
-  // Split state to manage loading independently
   const [userGenreSections, setUserGenreSections] = useState<Section[]>([]);
   const [otherGenreSections, setOtherGenreSections] = useState<Section[]>([]);
 
-  const [loadingNewMovies, setLoadingNewMovies] = useState(false);
-  const [loadingUserGenres, setLoadingUserGenres] = useState(false);
+  // --- Loading Indicators ---
+  const [loadingNew, setLoadingNew] = useState(true);
+  const [loadingUserGenres, setLoadingUserGenres] = useState(true);
   const [loadingOtherGenres, setLoadingOtherGenres] = useState(false);
 
-  // Helper to map API response to Korean titles
-  const mapToKorean = useCallback((section: Section) => ({
-    ...section,
-    title: genreMapToKorean[section.title] || section.title,
-    originalTitle: section.title
-  }), []);
+  // --- Main Data Fetching ---
+  const loadData = useCallback(async () => {
+    if (authLoading) return;
 
-  const loadNewMovies = useCallback(async () => {
-    setLoadingNewMovies(true);
-    try {
-      const response = await moviesAPI.getNew(20);
-      setNewMovies(response.data.movies || []);
-    } catch (err) {
-      console.error('Failed to load new movies:', err);
-      setNewMovies([]);
-    } finally {
-      setLoadingNewMovies(false);
-    }
-  }, []);
+    // 1. Always fetch "New Movies" immediately
+    setLoadingNew(true);
+    moviesAPI.getNew(20)
+        .then(res => setNewMovies(res.data.movies || []))
+        .catch(err => console.error('New movies failed', err))
+        .finally(() => setLoadingNew(false));
 
-  const loadGenreMovies = useCallback(async () => {
-    // 1. Identify Genres
-    const allGenres = Object.keys(genreMapToKorean);
-    const userGenres = (isAuthenticated && user?.preferredGenres) ? user.preferredGenres : [];
-    const restGenres = allGenres.filter(g => !userGenres.includes(g));
+    // 2. Logic to split "User Liked" vs "The Rest"
+    const userPrefs = (isAuthenticated && user?.preferredGenres) ? user.preferredGenres : [];
+    const restGenres = ALL_GENRES.filter(g => !userPrefs.includes(g));
 
-    // --- PHASE 1: Load User Genres (High Priority) ---
+    // --- Phase 1: Load User Preferred Genres ---
     setLoadingUserGenres(true);
-    if (userGenres.length > 0) {
+    if (userPrefs.length > 0) {
       try {
-        const response = await moviesAPI.getByGenres(userGenres);
+        const response = await moviesAPI.getByGenres(userPrefs);
         const sections = response.data.sections || [];
-        setUserGenreSections(sections.map(mapToKorean));
+        setUserGenreSections(sections);
       } catch (err) {
-        console.error('Failed to load user genre movies:', err);
-        setUserGenreSections([]);
+        console.error('User genres failed:', err);
       }
     } else {
       setUserGenreSections([]);
     }
     setLoadingUserGenres(false);
 
-    // --- PHASE 2: Load Remaining Genres (Low Priority) ---
-    setLoadingOtherGenres(true);
+    // --- Phase 2: Load Remaining Genres (Sequential) ---
+    // Only start fetching "Other" genres after determining user genres
     if (restGenres.length > 0) {
+      setLoadingOtherGenres(true);
       try {
         const response = await moviesAPI.getByGenres(restGenres);
         const sections = response.data.sections || [];
-        setOtherGenreSections(sections.map(mapToKorean));
+        setOtherGenreSections(sections);
       } catch (err) {
-        console.error('Failed to load other genre movies:', err);
-        setOtherGenreSections([]);
+        console.error('Other genres failed:', err);
+      } finally {
+        setLoadingOtherGenres(false);
       }
-    } else {
-      setOtherGenreSections([]);
     }
-    setLoadingOtherGenres(false);
-
-  }, [isAuthenticated, user?.preferredGenres, mapToKorean]);
+  }, [isAuthenticated, user, authLoading]);
 
   useEffect(() => {
-    void loadNewMovies();
-    void loadGenreMovies();
-  }, [loadNewMovies, loadGenreMovies]);
+    loadData();
+  }, [loadData]);
 
-  const handleLikeChange = () => {
-    // Optional: Refresh logic
-  };
-
+  // --- Search Handler ---
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated) {
@@ -133,20 +116,15 @@ export default function HomePage() {
     setHasSearched(true);
     try {
       const profileRes = await userAPI.getProfile();
-      const userPrefs = profileRes.data?.user ? {
-        genres: profileRes.data.user.preferredGenres || [],
-        actors: profileRes.data.user.preferredActors || [],
-        years: profileRes.data.user.preferredYears || { min: 1990, max: 2024 }
-      } : {};
-      const response = await recommendationsAPI.search(query, userPrefs);
+      const userPrefs = profileRes.data?.user || {};
+      const response = await recommendationsAPI.search(query, {
+        genres: userPrefs.preferredGenres,
+        actors: userPrefs.preferredActors,
+        years: userPrefs.preferredYears
+      });
       setSearchResults(response.data.movies || []);
-    } catch (err: unknown) {
-      if (err instanceof AxiosError && err.response?.status === 503) {
-        setSearchError('추천 서비스를 사용할 수 없습니다.');
-      } else {
-        setSearchError('검색에 실패했습니다.');
-      }
-      setSearchResults([]);
+    } catch (err) {
+      setSearchError('검색에 실패했습니다.');
     } finally {
       setLoadingSearch(false);
       setQuery('');
@@ -156,78 +134,125 @@ export default function HomePage() {
   return (
       <div className="min-h-screen bg-black text-white">
         <Header />
-        <section id="search" className="relative min-h-[70vh] flex items-center justify-center">
+
+        {/* Hero / Search Section */}
+        <section id="search" className="relative min-h-[60vh] flex items-center justify-center">
           <div className="absolute inset-0 bg-gradient-to-b from-blue-900/20 to-black"></div>
           <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '50px 50px' }}></div>
           <div className="container mx-auto px-4 py-32 relative z-10">
-            <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-5xl md:text-6xl font-bold mb-6">
-                {isAuthenticated && user?.name ? `${user.name}님` : '당신'}을 위한 완벽한 영화를 찾아드립니다
-              </h1>
-              <p className="text-xl text-gray-300 mb-12">지금 보고 싶은 영화를 검색해보세요</p>
-              <form onSubmit={handleSearch} className="flex gap-4">
-                <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="예: 우주를 배경으로 한 감동적인 영화" className="flex-1 px-6 py-4 bg-gray-800/50 backdrop-blur border border-gray-700 rounded-lg focus:outline-none focus:border-red-500 text-lg" />
-                <button type="submit" disabled={loadingSearch} className="px-8 py-4 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition disabled:opacity-50">{loadingSearch ? '검색 중...' : '추천받기'}</button>
+            <div className="max-w-4xl mx-auto text-center">
+
+              {/* UPDATED: Title & Subtitle */}
+              <div className="mb-8 animate-fade-in-up">
+                <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
+                  {isAuthenticated && user?.name ? (
+                      <>
+                        <span className="text-red-500">{user.name}</span>님을 위한 영화를 찾아드립니다
+                      </>
+                  ) : (
+                      "당신을 위한 영화를 찾아드립니다"
+                  )}
+                </h1>
+
+                {/* UPDATED TEXT HERE */}
+                {isAuthenticated ? (
+                    <p className="text-xl md:text-2xl text-gray-300 font-light">
+                      선호하는 취향과 오늘의 기분에 맞춰 엄선된 추천작을 만나보세요.
+                    </p>
+                ) : (
+                    <p className="text-xl md:text-2xl text-gray-300 font-light">
+                      오늘 당신의 마음을 움직일 특별한 이야기를 준비했습니다.
+                    </p>
+                )}
+              </div>
+
+              <form onSubmit={handleSearch} className="flex gap-4 mt-8">
+                <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="예: 우주를 배경으로 한 감동적인 영화"
+                    className="flex-1 px-6 py-4 bg-gray-800/50 backdrop-blur border border-gray-700 rounded-lg focus:outline-none focus:border-red-500 text-lg"
+                />
+                <button
+                    type="submit"
+                    disabled={loadingSearch}
+                    className="px-8 py-4 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition disabled:opacity-50"
+                >
+                  {loadingSearch ? '...' : '검색'}
+                </button>
               </form>
-              {searchError && <div className="mt-4 bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded">{searchError}</div>}
+              {searchError && <div className="mt-4 text-red-500">{searchError}</div>}
             </div>
           </div>
         </section>
 
+        {/* Search Results */}
         {hasSearched && (
-            <section className="container mx-auto px-4 py-16 -mt-20 relative z-10">
-              <h2 className="text-3xl font-bold mb-8">검색 결과</h2>
-              {loadingSearch ? (
-                  <div className="text-center py-16"><p className="text-gray-400">추천 영화를 불러오는 중...</p></div>
-              ) : searchResults.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                    {searchResults.map((movie) => (
-                        <div key={movie.id} onClick={() => router.push(`/movie/${movie.id}`)} className="cursor-pointer">
-                          <div className="relative aspect-[2/3] bg-gray-800 rounded-lg overflow-hidden mb-3 hover:ring-2 hover:ring-red-500 transition">
-                            {movie.posterUrl ? <Image src={movie.posterUrl} alt={movie.title} width={180} height={270} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-500">No Image</div>}
+            <section className="container mx-auto px-4 py-8 relative z-10">
+              <h2 className="text-2xl font-bold mb-6">검색 결과</h2>
+              {loadingSearch ? <p>검색 중...</p> : (
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    {searchResults.map(movie => (
+                        <div key={movie.id} onClick={() => router.push(`/movie/${movie.id}`)} className="cursor-pointer group">
+                          <div className="relative aspect-[2/3] bg-gray-800 rounded overflow-hidden mb-2">
+                            {movie.posterUrl && <Image src={movie.posterUrl} alt={movie.title} fill className="object-cover group-hover:scale-105 transition" />}
                           </div>
-                          <h3 className="font-medium line-clamp-2">{movie.title}</h3>
-                          <p className="text-sm text-gray-400">{movie.year}</p>
+                          <h3 className="text-sm font-medium">{movie.title}</h3>
                         </div>
                     ))}
                   </div>
-              ) : (
-                  <div className="text-center py-16"><p className="text-gray-400 text-lg">추천 영화를 찾을 수 없습니다</p></div>
               )}
             </section>
         )}
 
-        <div className={`pb-16 relative z-10 ${hasSearched ? 'pt-8' : '-mt-20'}`}>
+        {/* Main Carousel Rows */}
+        <div className="pb-16 relative z-10 container mx-auto px-4">
+
           {/* 1. New Movies */}
-          <Carousel title="새로운 영화" movies={newMovies} loading={loadingNewMovies} onLikeChange={handleLikeChange} />
+          <Carousel title="새로운 영화" movies={newMovies} loading={loadingNew} />
 
-          {/* 2. User Preferred Genres */}
-          {userGenreSections.map(section => (
-              <Carousel
-                  key={`user-genre-${section.originalTitle}`}
-                  title={section.title}
-                  movies={section.movies}
-                  loading={loadingUserGenres}
-                  onLikeChange={handleLikeChange}
-              />
-          ))}
-
-          {/* 3. Other Genres */}
-          {otherGenreSections.map(section => (
-              <Carousel
-                  key={`other-genre-${section.originalTitle}`}
-                  title={section.title}
-                  movies={section.movies}
-                  loading={loadingOtherGenres}
-                  onLikeChange={handleLikeChange}
-              />
-          ))}
-
-          {!isAuthenticated && !loadingUserGenres && !loadingOtherGenres && userGenreSections.length === 0 && otherGenreSections.length === 0 && (
-              <div className="container mx-auto px-4 py-8 text-center text-gray-400">
-                <p>로그인하시면 맞춤형 추천을 해드립니다.</p>
+          {/* 2. User Liked Genres */}
+          {userGenreSections.length > 0 && (
+              <div className="mt-12 mb-8">
+                <div className="flex items-center gap-2 mb-6 pl-2 border-l-4 border-red-600">
+                  <h2 className="text-2xl font-bold text-red-500">회원님을 위한 추천 장르</h2>
+                </div>
+                {userGenreSections.map(section => (
+                    <Carousel
+                        key={`user-${section.title}`}
+                        title={section.title}
+                        movies={section.movies}
+                        loading={loadingUserGenres}
+                    />
+                ))}
               </div>
           )}
+
+          {/* 3. Other Genres */}
+          {otherGenreSections.length > 0 && (
+              <div className="mt-16 mb-8">
+                <div className="flex items-center gap-2 mb-6 pl-2 border-l-4 border-red-600">
+                  <h2 className="text-2xl font-bold text-red-500">다른 장르 탐험하기</h2>
+                </div>
+                {otherGenreSections.map(section => (
+                    <Carousel
+                        key={`other-${section.title}`}
+                        title={section.title}
+                        movies={section.movies}
+                        loading={loadingOtherGenres}
+                    />
+                ))}
+              </div>
+          )}
+
+          {/* Loader for Other Genres */}
+          {loadingOtherGenres && !loadingUserGenres && (
+              <div className="opacity-50 mt-12">
+                <Carousel title="다른 장르 불러오는 중..." movies={[]} loading={true} />
+              </div>
+          )}
+
         </div>
       </div>
   );

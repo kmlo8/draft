@@ -283,6 +283,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$dr
 function SignupPage() {
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRouter"])();
     const { login } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$context$2f$AuthContext$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useAuth"])();
+    const [name, setName] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(''); // ADDED
     const [email, setEmail] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])('');
     const [password, setPassword] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])('');
     const [confirmPassword, setConfirmPassword] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])('');
@@ -291,7 +292,6 @@ function SignupPage() {
     const handleSubmit = async (e)=>{
         e.preventDefault();
         setError('');
-        // Validation
         if (password !== confirmPassword) {
             setError('비밀번호가 일치하지 않습니다');
             return;
@@ -300,19 +300,24 @@ function SignupPage() {
             setError('비밀번호는 최소 6자 이상이어야 합니다');
             return;
         }
+        if (!name.trim()) {
+            setError('닉네임을 입력해주세요');
+            return;
+        }
         setLoading(true);
         try {
-            const response = await __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["userAPI"].signup({
+            // Pass name to signup
+            const response = await __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["authAPI"].signup({
                 email,
-                password
+                password,
+                name
             });
             const { accessToken, user } = response.data;
-            // Set token and user
             (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["setAccessToken"])(accessToken);
             login(accessToken, user);
-            // Redirect to questionnaire
             router.push('/questionnaire');
         } catch (err) {
+            console.error(err);
             setError(err.response?.data?.error || 'Signup failed');
         } finally{
             setLoading(false);
@@ -323,8 +328,8 @@ function SignupPage() {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$components$2f$Header$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                lineNumber: 55,
-                columnNumber: 7
+                lineNumber: 60,
+                columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "container mx-auto px-4 pt-24 flex items-center justify-center min-h-screen",
@@ -341,22 +346,22 @@ function SignupPage() {
                                         children: "MovieFlix"
                                     }, void 0, false, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                                        lineNumber: 61,
-                                        columnNumber: 15
+                                        lineNumber: 66,
+                                        columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                         className: "text-gray-400",
                                         children: "회원가입하고 영화를 추천받으세요"
                                     }, void 0, false, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                                        lineNumber: 62,
-                                        columnNumber: 15
+                                        lineNumber: 67,
+                                        columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                                lineNumber: 60,
-                                columnNumber: 13
+                                lineNumber: 65,
+                                columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
                                 onSubmit: handleSubmit,
@@ -365,13 +370,43 @@ function SignupPage() {
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                                htmlFor: "name",
+                                                className: "block text-sm font-medium mb-2",
+                                                children: "닉네임"
+                                            }, void 0, false, {
+                                                fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
+                                                lineNumber: 73,
+                                                columnNumber: 19
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                                id: "name",
+                                                type: "text",
+                                                value: name,
+                                                onChange: (e)=>setName(e.target.value),
+                                                required: true,
+                                                className: "w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-red-500",
+                                                placeholder: "닉네임을 입력하세요"
+                                            }, void 0, false, {
+                                                fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
+                                                lineNumber: 76,
+                                                columnNumber: 19
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
+                                        lineNumber: 72,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
                                                 htmlFor: "email",
                                                 className: "block text-sm font-medium mb-2",
                                                 children: "이메일"
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                                                lineNumber: 67,
-                                                columnNumber: 17
+                                                lineNumber: 88,
+                                                columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                 id: "email",
@@ -383,14 +418,14 @@ function SignupPage() {
                                                 placeholder: "your@email.com"
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                                                lineNumber: 70,
-                                                columnNumber: 17
+                                                lineNumber: 91,
+                                                columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                                        lineNumber: 66,
-                                        columnNumber: 15
+                                        lineNumber: 87,
+                                        columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         children: [
@@ -400,8 +435,8 @@ function SignupPage() {
                                                 children: "비밀번호"
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                                                lineNumber: 82,
-                                                columnNumber: 17
+                                                lineNumber: 103,
+                                                columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                 id: "password",
@@ -413,14 +448,14 @@ function SignupPage() {
                                                 placeholder: "최소 6자"
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                                                lineNumber: 85,
-                                                columnNumber: 17
+                                                lineNumber: 106,
+                                                columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                                        lineNumber: 81,
-                                        columnNumber: 15
+                                        lineNumber: 102,
+                                        columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         children: [
@@ -430,8 +465,8 @@ function SignupPage() {
                                                 children: "비밀번호 확인"
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                                                lineNumber: 97,
-                                                columnNumber: 17
+                                                lineNumber: 118,
+                                                columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                 id: "confirmPassword",
@@ -443,22 +478,22 @@ function SignupPage() {
                                                 placeholder: "비밀번호 다시 입력"
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                                                lineNumber: 100,
-                                                columnNumber: 17
+                                                lineNumber: 121,
+                                                columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                                        lineNumber: 96,
-                                        columnNumber: 15
+                                        lineNumber: 117,
+                                        columnNumber: 17
                                     }, this),
                                     error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded text-sm",
                                         children: error
                                     }, void 0, false, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                                        lineNumber: 112,
-                                        columnNumber: 17
+                                        lineNumber: 133,
+                                        columnNumber: 21
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                         type: "submit",
@@ -467,14 +502,14 @@ function SignupPage() {
                                         children: loading ? '가입 중...' : '회원가입'
                                     }, void 0, false, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                                        lineNumber: 117,
-                                        columnNumber: 15
+                                        lineNumber: 138,
+                                        columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                                lineNumber: 65,
-                                columnNumber: 13
+                                lineNumber: 70,
+                                columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "mt-6 text-center text-sm text-gray-400",
@@ -487,38 +522,38 @@ function SignupPage() {
                                         children: "로그인"
                                     }, void 0, false, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                                        lineNumber: 128,
-                                        columnNumber: 15
+                                        lineNumber: 149,
+                                        columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                                lineNumber: 126,
-                                columnNumber: 13
+                                lineNumber: 147,
+                                columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                        lineNumber: 59,
-                        columnNumber: 11
+                        lineNumber: 64,
+                        columnNumber: 13
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                    lineNumber: 58,
-                    columnNumber: 9
+                    lineNumber: 63,
+                    columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-                lineNumber: 57,
-                columnNumber: 7
+                lineNumber: 62,
+                columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/signup/page.tsx",
-        lineNumber: 54,
-        columnNumber: 5
+        lineNumber: 59,
+        columnNumber: 7
     }, this);
-} //// hahahahahahahahahahhahahahahahha
+}
 }),
 ];
 

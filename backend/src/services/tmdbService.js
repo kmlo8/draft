@@ -7,8 +7,6 @@ const { TMDB_CONFIG, getImageUrl } = require('../config/tmdb');
 /**
  * Get movie by TMDB ID
  * Checks database first, fetches from TMDB API if not cached
- * @param {number} tmdbId - TMDB movie ID
- * @returns {Promise<Object>} Movie object
  */
 const getMovieByTmdbId = async (tmdbId) => {
   try {
@@ -48,6 +46,8 @@ const getMovieByTmdbId = async (tmdbId) => {
     const castArray = [];
     for (let i = 0; i < Math.min(creditsData.cast.length, 15); i++) {
       const castMember = creditsData.cast[i];
+      // Construct profile URL
+      const profilePath = getImageUrl(castMember.profile_path, 'w185');
 
       // Find or create actor
       let actor = await Actor.findOne({ tmdbId: castMember.id });
@@ -55,8 +55,8 @@ const getMovieByTmdbId = async (tmdbId) => {
         actor = new Actor({
           tmdbId: castMember.id,
           name: castMember.name,
-          nameEnglish: castMember.name,
-          profileUrl: getImageUrl(castMember.profile_path, 'w185')
+          nameEnglish: castMember.name, // Consider using original_name if available
+          profileUrl: profilePath
         });
         await actor.save();
       }
@@ -65,6 +65,7 @@ const getMovieByTmdbId = async (tmdbId) => {
         actorId: actor._id,
         actorName: castMember.name,
         character: castMember.character,
+        profileUrl: profilePath, // ADDED: Save image URL to movie document directly for easier access
         order: castMember.order
       });
     }
@@ -74,6 +75,8 @@ const getMovieByTmdbId = async (tmdbId) => {
     const directors = creditsData.crew.filter(person => person.job === 'Director');
 
     for (const directorData of directors) {
+      const profilePath = getImageUrl(directorData.profile_path, 'w185');
+
       // Find or create director
       let director = await Director.findOne({ tmdbId: directorData.id });
       if (!director) {
@@ -81,14 +84,15 @@ const getMovieByTmdbId = async (tmdbId) => {
           tmdbId: directorData.id,
           name: directorData.name,
           nameEnglish: directorData.name,
-          profileUrl: getImageUrl(directorData.profile_path, 'w185')
+          profileUrl: profilePath
         });
         await director.save();
       }
 
       directorsArray.push({
         directorId: director._id,
-        directorName: directorData.name
+        directorName: directorData.name,
+        profileUrl: profilePath // ADDED: Save image URL here too
       });
     }
 
@@ -106,6 +110,7 @@ const getMovieByTmdbId = async (tmdbId) => {
       backdropUrl: getImageUrl(movieData.backdrop_path, 'w1280'),
       runtime: movieData.runtime,
       rating: movieData.adult ? '청소년 관람불가' : '전체 관람가',
+      voteAverage: movieData.vote_average, // ADDED: Map vote_average
       cast: castArray,
       directors: directorsArray,
       tmdbLastFetched: new Date()
@@ -114,9 +119,9 @@ const getMovieByTmdbId = async (tmdbId) => {
     // Create or update movie
     if (movie) {
       movie = await Movie.findOneAndUpdate(
-        { tmdbId },
-        movieDocument,
-        { new: true }
+          { tmdbId },
+          movieDocument,
+          { new: true }
       );
     } else {
       movie = new Movie(movieDocument);
@@ -125,16 +130,16 @@ const getMovieByTmdbId = async (tmdbId) => {
       // Update actor movieIds
       for (const cast of castArray) {
         await Actor.findByIdAndUpdate(
-          cast.actorId,
-          { $addToSet: { movieIds: movie._id } }
+            cast.actorId,
+            { $addToSet: { movieIds: movie._id } }
         );
       }
 
       // Update director movieIds
       for (const dir of directorsArray) {
         await Director.findByIdAndUpdate(
-          dir.directorId,
-          { $addToSet: { movieIds: movie._id } }
+            dir.directorId,
+            { $addToSet: { movieIds: movie._id } }
         );
       }
     }
@@ -148,9 +153,6 @@ const getMovieByTmdbId = async (tmdbId) => {
 
 /**
  * Search movies on TMDB
- * @param {string} query - Search query
- * @param {object} filters - Optional filters (genre, year)
- * @returns {Promise<Array>} Array of movie results
  */
 const searchMoviesOnTMDB = async (query, filters = {}) => {
   try {
@@ -163,9 +165,8 @@ const searchMoviesOnTMDB = async (query, filters = {}) => {
       }
     });
 
-    const results = response.data.results.slice(0, 20); // Limit to 20 results
+    const results = response.data.results.slice(0, 20);
 
-    // Cache each movie
     const movies = [];
     for (const result of results) {
       try {
@@ -185,8 +186,6 @@ const searchMoviesOnTMDB = async (query, filters = {}) => {
 
 /**
  * Get trending movies from TMDB
- * @param {string} timeWindow - 'day' or 'week'
- * @returns {Promise<Array>} Array of trending movies
  */
 const getTrendingMovies = async (timeWindow = 'week') => {
   try {
@@ -199,7 +198,6 @@ const getTrendingMovies = async (timeWindow = 'week') => {
 
     const results = response.data.results.slice(0, 20);
 
-    // Cache movies
     const movies = [];
     for (const result of results) {
       try {

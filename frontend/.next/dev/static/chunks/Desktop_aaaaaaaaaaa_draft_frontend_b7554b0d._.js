@@ -139,6 +139,8 @@ const authAPI = {
             email,
             password
         }),
+    // UPDATED: Added 'name' to the input interface
+    signup: (data)=>api.post('/api/auth/signup', data),
     logout: ()=>api.post('/api/auth/logout'),
     refresh: ()=>api.post('/api/auth/refresh')
 };

@@ -420,6 +420,14 @@ function UserPage() {
     const [likedActors, setLikedActors] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     const [likedDirectors, setLikedDirectors] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
+    // DEBUG: Check if user data is loaded correctly
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "UserPage.useEffect": ()=>{
+            console.log('Current User State:', user);
+        }
+    }["UserPage.useEffect"], [
+        user
+    ]);
     const loadUserData = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
         "UserPage.useCallback[loadUserData]": async ()=>{
             if (!isAuthenticated) return;
@@ -463,7 +471,6 @@ function UserPage() {
         loadUserData
     ]);
     const handleLikeChange = ()=>{
-        // Re-fetch all user data after a short delay
         setTimeout(()=>{
             loadUserData();
         }, 300);
@@ -480,8 +487,8 @@ function UserPage() {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$components$2f$Header$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                lineNumber: 84,
-                columnNumber: 7
+                lineNumber: 88,
+                columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "container mx-auto px-4 pt-24 pb-16",
@@ -501,8 +508,8 @@ function UserPage() {
                                         children: "취향 설정 변경"
                                     }, void 0, false, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                        lineNumber: 88,
-                                        columnNumber: 13
+                                        lineNumber: 92,
+                                        columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                         onClick: toggleDarkMode,
@@ -511,14 +518,14 @@ function UserPage() {
                                         children: darkMode ? '라이트 모드' : '다크 모드'
                                     }, void 0, false, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                        lineNumber: 97,
-                                        columnNumber: 13
+                                        lineNumber: 101,
+                                        columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                lineNumber: 87,
-                                columnNumber: 11
+                                lineNumber: 91,
+                                columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "flex items-center gap-6 mb-8",
@@ -537,48 +544,59 @@ function UserPage() {
                                                 d: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                lineNumber: 108,
-                                                columnNumber: 17
+                                                lineNumber: 118,
+                                                columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                            lineNumber: 107,
-                                            columnNumber: 15
+                                            lineNumber: 117,
+                                            columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                        lineNumber: 106,
-                                        columnNumber: 13
+                                        lineNumber: 116,
+                                        columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
                                                 className: "text-3xl font-bold mb-2",
-                                                children: "마이페이지"
+                                                children: user?.name ? `${user.name}님의 마이페이지` : '마이페이지'
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                lineNumber: 112,
-                                                columnNumber: 15
+                                                lineNumber: 122,
+                                                columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "text-gray-400",
                                                 children: "좋아요한 영화, 감독, 배우를 관리하세요"
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                lineNumber: 113,
-                                                columnNumber: 15
+                                                lineNumber: 125,
+                                                columnNumber: 17
+                                            }, this),
+                                            !user?.name && user?.email && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                className: "text-xs text-gray-500 mt-1",
+                                                children: [
+                                                    "계정: ",
+                                                    user.email
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
+                                                lineNumber: 128,
+                                                columnNumber: 21
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                        lineNumber: 111,
-                                        columnNumber: 13
+                                        lineNumber: 121,
+                                        columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                lineNumber: 105,
-                                columnNumber: 11
+                                lineNumber: 115,
+                                columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "grid grid-cols-1 md:grid-cols-3 gap-4 mb-8",
@@ -591,22 +609,22 @@ function UserPage() {
                                                 children: stats.moviesLiked
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                lineNumber: 118,
-                                                columnNumber: 15
+                                                lineNumber: 134,
+                                                columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "text-gray-400 text-sm",
                                                 children: "좋아요한 영화"
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                lineNumber: 119,
-                                                columnNumber: 15
+                                                lineNumber: 135,
+                                                columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                        lineNumber: 117,
-                                        columnNumber: 13
+                                        lineNumber: 133,
+                                        columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "bg-gray-900 rounded-lg p-6 border border-gray-800 text-center",
@@ -616,22 +634,22 @@ function UserPage() {
                                                 children: stats.actorsLiked
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                lineNumber: 122,
-                                                columnNumber: 15
+                                                lineNumber: 138,
+                                                columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "text-gray-400 text-sm",
                                                 children: "좋아요한 배우"
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                lineNumber: 123,
-                                                columnNumber: 15
+                                                lineNumber: 139,
+                                                columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                        lineNumber: 121,
-                                        columnNumber: 13
+                                        lineNumber: 137,
+                                        columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "bg-gray-900 rounded-lg p-6 border border-gray-800 text-center",
@@ -641,34 +659,34 @@ function UserPage() {
                                                 children: stats.directorsLiked
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                lineNumber: 126,
-                                                columnNumber: 15
+                                                lineNumber: 142,
+                                                columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "text-gray-400 text-sm",
                                                 children: "좋아요한 감독"
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                lineNumber: 127,
-                                                columnNumber: 15
+                                                lineNumber: 143,
+                                                columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                        lineNumber: 125,
-                                        columnNumber: 13
+                                        lineNumber: 141,
+                                        columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                lineNumber: 116,
-                                columnNumber: 11
+                                lineNumber: 132,
+                                columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                        lineNumber: 86,
-                        columnNumber: 9
+                        lineNumber: 90,
+                        columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "flex gap-4 mb-8 border-b border-gray-800",
@@ -682,13 +700,13 @@ function UserPage() {
                                 children: tab
                             }, tab, false, {
                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                lineNumber: 134,
-                                columnNumber: 13
+                                lineNumber: 150,
+                                columnNumber: 17
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                        lineNumber: 132,
-                        columnNumber: 9
+                        lineNumber: 148,
+                        columnNumber: 11
                     }, this),
                     loading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "text-center py-16",
@@ -697,13 +715,13 @@ function UserPage() {
                             children: "로딩 중..."
                         }, void 0, false, {
                             fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                            lineNumber: 145,
-                            columnNumber: 46
+                            lineNumber: 161,
+                            columnNumber: 50
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                        lineNumber: 145,
-                        columnNumber: 11
+                        lineNumber: 161,
+                        columnNumber: 15
                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                         children: [
                             activeTab === '영화' && (likedMovies.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -721,8 +739,8 @@ function UserPage() {
                                                         className: "w-full h-full object-cover"
                                                     }, void 0, false, {
                                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                        lineNumber: 154,
-                                                        columnNumber: 25
+                                                        lineNumber: 170,
+                                                        columnNumber: 35
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$components$2f$MoviePosterOverlay$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                                         movieId: movie.id,
@@ -731,41 +749,41 @@ function UserPage() {
                                                         onLikeChange: handleLikeChange
                                                     }, void 0, false, {
                                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                        lineNumber: 155,
-                                                        columnNumber: 25
+                                                        lineNumber: 171,
+                                                        columnNumber: 35
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                lineNumber: 153,
-                                                columnNumber: 23
+                                                lineNumber: 169,
+                                                columnNumber: 33
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
                                                 className: "font-medium line-clamp-2",
                                                 children: movie.title
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                lineNumber: 157,
-                                                columnNumber: 23
+                                                lineNumber: 173,
+                                                columnNumber: 33
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "text-sm text-gray-400",
                                                 children: movie.year
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                lineNumber: 158,
-                                                columnNumber: 23
+                                                lineNumber: 174,
+                                                columnNumber: 33
                                             }, this)
                                         ]
                                     }, movie.id, true, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                        lineNumber: 152,
-                                        columnNumber: 21
+                                        lineNumber: 168,
+                                        columnNumber: 31
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                lineNumber: 150,
-                                columnNumber: 17
+                                lineNumber: 166,
+                                columnNumber: 25
                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "text-center py-16",
                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -773,13 +791,13 @@ function UserPage() {
                                     children: "아직 좋아요한 영화가 없습니다"
                                 }, void 0, false, {
                                     fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                    lineNumber: 162,
-                                    columnNumber: 54
+                                    lineNumber: 178,
+                                    columnNumber: 60
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                lineNumber: 162,
-                                columnNumber: 19
+                                lineNumber: 178,
+                                columnNumber: 25
                             }, this)),
                             activeTab === '감독' && (likedDirectors.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6",
@@ -794,32 +812,32 @@ function UserPage() {
                                                     className: "w-full h-full object-cover"
                                                 }, void 0, false, {
                                                     fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                    lineNumber: 170,
-                                                    columnNumber: 25
+                                                    lineNumber: 186,
+                                                    columnNumber: 35
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                lineNumber: 169,
-                                                columnNumber: 23
+                                                lineNumber: 185,
+                                                columnNumber: 33
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "line-clamp-2 font-medium",
                                                 children: d.name
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                lineNumber: 172,
-                                                columnNumber: 23
+                                                lineNumber: 188,
+                                                columnNumber: 33
                                             }, this)
                                         ]
                                     }, d.id, true, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                        lineNumber: 168,
-                                        columnNumber: 21
+                                        lineNumber: 184,
+                                        columnNumber: 31
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                lineNumber: 166,
-                                columnNumber: 17
+                                lineNumber: 182,
+                                columnNumber: 25
                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "text-center py-16",
                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -827,13 +845,13 @@ function UserPage() {
                                     children: "아직 좋아요한 감독이 없습니다"
                                 }, void 0, false, {
                                     fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                    lineNumber: 176,
-                                    columnNumber: 54
+                                    lineNumber: 192,
+                                    columnNumber: 60
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                lineNumber: 176,
-                                columnNumber: 19
+                                lineNumber: 192,
+                                columnNumber: 25
                             }, this)),
                             activeTab === '배우' && (likedActors.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6",
@@ -849,32 +867,32 @@ function UserPage() {
                                                     className: "w-full h-full object-cover"
                                                 }, void 0, false, {
                                                     fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                    lineNumber: 184,
-                                                    columnNumber: 25
+                                                    lineNumber: 200,
+                                                    columnNumber: 35
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                lineNumber: 183,
-                                                columnNumber: 23
+                                                lineNumber: 199,
+                                                columnNumber: 33
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "line-clamp-2 font-medium",
                                                 children: a.name
                                             }, void 0, false, {
                                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                                lineNumber: 186,
-                                                columnNumber: 23
+                                                lineNumber: 202,
+                                                columnNumber: 33
                                             }, this)
                                         ]
                                     }, a.id, true, {
                                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                        lineNumber: 182,
-                                        columnNumber: 21
+                                        lineNumber: 198,
+                                        columnNumber: 31
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                lineNumber: 180,
-                                columnNumber: 17
+                                lineNumber: 196,
+                                columnNumber: 25
                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "text-center py-16",
                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -882,13 +900,13 @@ function UserPage() {
                                     children: "아직 좋아요한 배우가 없습니다"
                                 }, void 0, false, {
                                     fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                    lineNumber: 190,
-                                    columnNumber: 54
+                                    lineNumber: 206,
+                                    columnNumber: 60
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                                lineNumber: 190,
-                                columnNumber: 19
+                                lineNumber: 206,
+                                columnNumber: 25
                             }, this))
                         ]
                     }, void 0, true),
@@ -900,28 +918,28 @@ function UserPage() {
                             children: "로그아웃"
                         }, void 0, false, {
                             fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                            lineNumber: 196,
-                            columnNumber: 11
+                            lineNumber: 212,
+                            columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                        lineNumber: 195,
-                        columnNumber: 9
+                        lineNumber: 211,
+                        columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-                lineNumber: 85,
-                columnNumber: 7
+                lineNumber: 89,
+                columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/Desktop/aaaaaaaaaaa/draft/frontend/app/user/page.tsx",
-        lineNumber: 83,
-        columnNumber: 5
+        lineNumber: 87,
+        columnNumber: 7
     }, this);
 }
-_s(UserPage, "fozUFn3G9w0ggClfVyTDPmnlxfk=", false, function() {
+_s(UserPage, "rF1AeTIP3ITFc67pi52dFfBuDXo=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"],
         __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$aaaaaaaaaaa$2f$draft$2f$frontend$2f$context$2f$AuthContext$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuth"],
