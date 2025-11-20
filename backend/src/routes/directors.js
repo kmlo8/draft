@@ -1,19 +1,19 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Director = require('../models/Director');
 const Movie = require('../models/Movie');
 const { optionalAuth } = require('../middleware/auth');
+
 /**
  * GET /api/directors/search
  * Search directors by name and return brief filmography
- * Auth: Optional
  */
 router.get('/search', optionalAuth, async (req, res) => {
   try {
     const q = (req.query.q || '').toString().trim();
     if (!q) return res.status(400).json({ error: 'Query required' });
 
-    // text search with fallback to regex
     let directors = await Director.find({ $text: { $search: q } }).limit(10);
     if (!directors || directors.length === 0) {
       directors = await Director.find({ name: { $regex: q, $options: 'i' } }).limit(10);
@@ -21,9 +21,10 @@ router.get('/search', optionalAuth, async (req, res) => {
 
     const results = [];
     for (const director of directors) {
+      // Using director.movieIds is reliable
       const movies = await Movie.find({ _id: { $in: director.movieIds } })
-        .sort({ year: -1 })
-        .limit(8);
+          .sort({ year: -1 })
+          .limit(8);
       results.push({
         id: director._id,
         name: director.name,
@@ -43,25 +44,29 @@ router.get('/search', optionalAuth, async (req, res) => {
 /**
  * GET /api/directors/:id
  * Get director details and filmography
- * Auth: Optional
  */
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const directorId = req.params.id;
 
-    // Find director
+    if (!directorId || directorId === 'undefined' || !mongoose.Types.ObjectId.isValid(directorId)) {
+      return res.status(400).json({ error: 'Invalid Director ID' });
+    }
+
     const director = await Director.findById(directorId);
 
     if (!director) {
       return res.status(404).json({ error: 'Director not found' });
     }
 
-    // Get movies directed by this director
+    // --- FIX START: Use director.movieIds to get ALL movies ---
+    // Previously: Movie.find({ 'directors.directorId': director._id })
+    // Now: We use the IDs listed in the director document itself.
     const movies = await Movie.find({
-      'directors.directorId': director._id
+      _id: { $in: director.movieIds }
     }).sort({ year: -1 });
+    // --- FIX END ---
 
-    // Format movie data
     const filmography = movies.map(movie => ({
       id: movie._id,
       title: movie.title,

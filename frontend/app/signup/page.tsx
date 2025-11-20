@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { authAPI, setAccessToken } from '@/lib/api';
+import { userAPI, setAccessToken } from '@/lib/api';
 import Header from '@/components/Header';
 
 export default function SignupPage() {
@@ -34,7 +34,7 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      const response = await authAPI.signup(email, password);
+      const response = await userAPI.signup({ email, password });
       const { accessToken, user } = response.data;
 
       // Set token and user
