@@ -1,79 +1,87 @@
-# MovieFlix Frontend
+cd ../frontend
+echo "# MovieFlix Frontend
 
-Next.js frontend application for the MovieFlix movie recommendation system with TypeScript, Tailwind CSS, and React.
+The client-side application for MovieFlix, a personalized movie recommendation platform. Built with Next.js (App Router), TypeScript, and Tailwind CSS.
 
-## Features
+## ✨ Features
 
-- **Authentication**: JWT-based authentication with automatic token refresh
-- **Dark Mode**: System-wide dark mode with user preference persistence
-- **Natural Language Search**: LLM-powered movie search
-- **Personalized Recommendations**: Based on user preferences and viewing history
-- **Movie Discovery**: Browse movies, view details, like movies/actors/directors
-- **Responsive Design**: Mobile-first design with Tailwind CSS
+- **User Authentication:** Secure Login/Signup flow.
+- **Personalized Dashboard (My Page):** View statistics and manage liked Movies, Actors, and Directors.
+- **Movie Discovery:** Browsing carousels for New Releases, Trending, and Genre-based recommendations.
+- **Search:** Real-time movie search functionality.
+- **Details View:** Comprehensive pages for Movies (including Cast/Director info).
+- **Interactive UI:** Like/Unlike functionality with custom confirmation modals and Dark Mode support.
 
-## Prerequisites
+## 🛠 Tech Stack
 
-- Node.js (v18 or higher)
-- Backend API running on http://localhost:5000
+- **Framework:** Next.js 13+ (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **State Management:** React Context API (AuthContext, ThemeContext)
+- **HTTP Client:** Axios
 
-## Getting Started
+## 🚀 Getting Started
 
-1. **Install dependencies:**
-   ```bash
+### 1. Prerequisites
+- Node.js (v14 or higher)
+- The **Backend Server** must be running on port 5001.
+
+### 2. Installation
+
+1. Navigate to the frontend directory:
+   \`\`\`bash
+   cd frontend
+   \`\`\`
+
+2. Install dependencies:
+   \`\`\`bash
    npm install
-   ```
+   \`\`\`
 
-2. **Configure environment variables:**
+### 3. Environment Configuration
 
-   Create `.env.local` file:
-   ```bash
-   NEXT_PUBLIC_API_URL=http://localhost:5000
-   NEXT_PUBLIC_APP_NAME=MovieFlix
-   ```
+Create a \`.env.local\` file in the \`frontend\` root directory:
 
-3. **Start development server:**
-   ```bash
-   npm run dev
-   ```
+\`\`\`env
+# URL of the backend server
+NEXT_PUBLIC_API_URL=http://localhost:5001
+\`\`\`
 
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
+### 4. Configuration for Images
 
-## Core Pages Implemented
+To display movie posters and actor profiles from TMDB, ensure your \`next.config.mjs\` (or \`.js\`) is configured as follows:
 
-- **Home (/)** - Search and browse movies
-- **Login (/login)** - User authentication
-- **Signup (/signup)** - Account creation
-- **Questionnaire (/questionnaire)** - Set movie preferences
+\`\`\`javascript
+const nextConfig = {
+images: {
+remotePatterns: [
+{
+protocol: 'https',
+hostname: 'image.tmdb.org',
+pathname: '/**',
+},
+],
+},
+};
 
-## Authentication
+export default nextConfig;
+\`\`\`
 
-The app uses JWT tokens with automatic refresh:
-- Access tokens stored in memory
-- Refresh tokens in httpOnly cookies
-- Automatic token refresh on expiry
-- Protected routes with middleware
+### 5. Running the Application
 
-## Tech Stack
+Run the development server:
+\`\`\`bash
+npm run dev
+\`\`\`
 
-- Next.js 16 (App Router)
-- TypeScript
-- Tailwind CSS 4
-- Axios for API calls
-- React Context for state management
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-## Development
+## 📂 Key Directory Structure
 
-```bash
-npm run dev    # Start dev server
-npm run build  # Build for production
-npm run start  # Start production server
-npm run lint   # Run linter
-```
-
-## Documentation
-
-See backend README for API documentation and setup instructions.
-
-## License
-
-ISC
+- **\`app/\`**: Next.js App Router pages.
+   - **\`page.tsx\`**: The main landing page.
+   - **\`movie/[id]/\`**: Dynamic movie detail page.
+   - **\`user/\`**: The User Profile / My Page.
+- **\`components/\`**: Reusable UI components (e.g., \`Carousel\`, \`MovieActions\`, \`PersonList\`, \`Header\`).
+- **\`context/\`**: Global state providers (\`AuthContext\`, \`ThemeContext\`).
+- **\`lib/\`**: API configuration and Axios setup (\`api.ts\`)." 
