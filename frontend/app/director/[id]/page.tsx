@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { notFound } from 'next/navigation';
+import { use, useEffect, useState } from 'react';
+import { notFound, useRouter } from 'next/navigation'; // Added useRouter
 import { directorsAPI } from '@/lib/api';
 import Loading from '@/components/Loading';
 import Error from '@/components/Error';
@@ -23,20 +23,28 @@ type Movie = {
 };
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
-export default function DirectorPage({ params: { id } }: Props) {
+export default function DirectorPage({ params }: Props) {
+  const { id } = use(params);
+  const router = useRouter(); // Initialize router
+
   const [director, setDirector] = useState<Director | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!id || id === 'undefined') {
+      setLoading(false);
+      return;
+    }
+
     const fetchDirector = async () => {
       try {
         const directorData = await directorsAPI.getById(id);
         setDirector(directorData);
-      } catch (err) {
+      } catch (err: any) {
         if (err.response?.status === 404) {
           notFound();
         } else {
@@ -54,30 +62,50 @@ export default function DirectorPage({ params: { id } }: Props) {
   if (!director) return null;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row gap-8">
-        <div className="w-full md:w-60 lg:w-72 flex-shrink-0">
-          <div className="aspect-[2/3] rounded-lg overflow-hidden ring-1 ring-white/10 bg-gray-900">
-            {director.profileUrl ? (
-              <img src={director.profileUrl} alt={director.name} className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-500">No Image</div>
-            )}
+      <div className="min-h-screen bg-black text-white px-4 py-8 md:px-8">
+        {/* Header Section */}
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-start mb-12 mt-4">
+            <div className="flex items-center gap-6">
+              {/* Circular Profile Image */}
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden bg-gray-800 ring-2 ring-white/20 flex-shrink-0">
+                {director.profileUrl ? (
+                    <img
+                        src={director.profileUrl}
+                        alt={director.name}
+                        className="w-full h-full object-cover"
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm">No Image</div>
+                )}
+              </div>
+
+              {/* Director Name */}
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold mb-1">{director.name}</h1>
+                <p className="text-gray-400 text-sm md:text-base">{director.nameEnglish}</p>
+              </div>
+            </div>
+
+            {/* Back Button */}
+            <button
+                onClick={() => router.back()}
+                className="px-4 py-1.5 rounded-full border border-gray-600 text-sm text-gray-300 hover:bg-white/10 transition-colors"
+            >
+              뒤로가기
+            </button>
+          </div>
+
+          {/* Content Section */}
+          <div>
+            <h2 className="text-lg font-bold mb-6 text-white">출연작</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-8">
+              {director.movies.map((movie) => (
+                  <MoviePoster key={movie.id} movie={movie} />
+              ))}
+            </div>
           </div>
         </div>
-        <div className="flex-1">
-          <h1 className="text-3xl md:text-5xl font-bold mb-2">{director.name}</h1>
-          <p className="mb-4 text-lg text-gray-400">{director.nameEnglish}</p>
-        </div>
       </div>
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold mb-4">Movies</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {director.movies.map((movie) => (
-            <MoviePoster key={movie.id} movie={movie} />
-          ))}
-        </div>
-      </div>
-    </div>
   );
 }

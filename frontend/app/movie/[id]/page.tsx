@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { notFound } from 'next/navigation';
+import { useParams } from 'next/navigation';
+
 import { moviesAPI } from '@/lib/api';
 import Loading from '@/components/Loading';
-import Error from '@/components/Error';
+import ErrorComponent from '@/components/Error';
 import MovieActions from '@/components/MovieActions';
 import PersonList from '@/components/PersonList';
-import Loading from '@/components/Loading';
-import Error from '@/components/Error';
-import { getMovie } from '@/lib/api';
+// import { getMovie } from '@/lib/api';
 
 type Movie = {
   id: string;
@@ -34,22 +34,21 @@ type Props = {
   params: { id: string };
 };
 
-export default function MoviePage({ params: { id } }: Props) {
+export default function MoviePage() {
+  const params = useParams(); // Next.js hook
+  const id = params.id;       // now id is safe to use
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!id) return;
     const fetchMovie = async () => {
       try {
         const movieData = await moviesAPI.getMovie(id);
         setMovie(movieData);
       } catch (err) {
-        if (err.response?.status === 404) {
-          notFound();
-        } else {
-          setError('Failed to fetch movie data.');
-        }
+        setError('Failed to fetch movie data.');
       } finally {
         setLoading(false);
       }
@@ -57,8 +56,9 @@ export default function MoviePage({ params: { id } }: Props) {
     fetchMovie();
   }, [id]);
 
+
   if (loading) return <Loading />;
-  if (error) return <Error message={error} />;
+  if (error) return <ErrorComponent message={error} />;
   if (!movie) return null;
 
   return (
